@@ -1,0 +1,22 @@
+<div class="card" [ngClass]="cardClass" [@cardRemove]="cardRemove">
+  <div class="card-header" *ngIf="!hidHeader" [ngClass]="headerClass">
+    <h5 *ngIf="!customHeader">{{ cardTitle }}</h5>
+    <p *ngIf="!customHeader && cardCaption" [ngClass]="captionClass">{{cardCaption}}</p>
+    <div class="card-header-right" *ngIf="this.options && !customHeader">
+      
+    </div>
+    <ng-content *ngIf="customHeader" select=".app-card-header"></ng-content>
+  </div>
+  <div [@collapsedCard]="collapsedCard" *ngIf="this.options; else subMenuContent">
+    <ng-container *ngTemplateOutlet="subMenuContent"></ng-container>
+  </div>
+  <ng-template #subMenuContent>
+    <div class="card-body" [ngClass]="blockClass">
+      <ng-content></ng-content>
+    </div>
+  </ng-template>
+  <div *ngIf="isCardFooter" class="card-footer" [ngClass]="footerClass">
+    <ng-content select=".app-card-footer"></ng-content>
+  </div>
+  <div class="card-loader" *ngIf="loadCard"><i class="pct-loader1 anim-rotate"></i></div>
+</div>

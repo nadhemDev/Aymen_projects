@@ -1,0 +1,119 @@
+<div class="row">
+  <div class="col-sm-12">
+    <app-card cardTitle="Liste des Statuts">
+
+      <!-- Barre de recherche et bouton Ajouter côte à côte à droite avec espace -->
+   <!-- Barre de recherche et bouton Ajouter côte à côte à droite avec espace -->
+<div class="d-flex justify-content-end align-items-center mb-3">
+  <div class="d-flex align-items-center" style="gap: 10px;">
+    <div class="input-group" style="max-width: 300px;">
+      <input type="text" class="form-control" placeholder="Rechercher..."
+             [(ngModel)]="searchText">
+      <span class="input-group-text">
+        <i class="feather icon-search"></i>
+      </span>
+    </div>
+
+    <button type="button" class="btn btn-success d-flex align-items-center text-nowrap"  (click)="openModal()">
+      <i class="feather icon-plus me-1"></i>
+      <span>Ajouter Statut</span>
+    </button>
+    
+  </div>
+</div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered text-center">
+          <thead class="align-middle">
+            <tr>
+              <th class="text-center">ID</th>
+              <th class="text-center">Libellé</th>
+              <th class="text-center">Module</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let statut of statuts">
+              <td class="align-middle">{{ statut.id_statut }}</td>
+              <td class="align-middle">{{ statut.libelle }}</td>
+              <td class="align-middle">{{ statut.module }}</td>
+              <td class="align-middle">
+                <button type="button" class="btn btn-icon btn-warning me-2" (click)="editStatut(statut)">
+                  <i class="feather icon-edit-2"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-danger me-2" (click)="confirmDelete(statut.id_statut)">
+                  <i class="feather icon-trash-2"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-info" (click)="openDetailModal(statut)">
+                  <i class="feather icon-info"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Modal -->
+<!-- Modal -->
+<div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showModal }" role="dialog" *ngIf="showModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editingStatut ? 'Modifier le Statut' : 'Ajouter un Statut' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <app-ajout-statut 
+          [initialStatut]="editingStatut" 
+          (close)="closeModal()" 
+          (onStatutAdded)="refreshList()">
+        </app-ajout-statut>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+ <!-- Modal de confirmation de suppression -->
+ <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showConfirmModal }" role="dialog" *ngIf="showConfirmModal">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmer la suppression</h5>
+        <button type="button" class="btn-close" (click)="closeConfirmModal()"></button>
+      </div>
+      <div class="modal-body">
+        <p>Êtes-vous sûr de vouloir supprimer ce statut ?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmModal()">Annuler</button>
+        <button type="button" class="btn btn-danger" (click)="deleteStatut(selectedStatutId)">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+    </app-card>
+  </div>
+</div>
+<!-- Modal pour afficher les détails du statut -->
+<div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showDetailModal }" role="dialog" *ngIf="showDetailModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Détail du Statut</h5>
+        <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedStatut">
+          <p><strong>ID Statut:</strong> {{ selectedStatut.id_statut }}</p>
+          <p><strong>Libellé:</strong> {{ selectedStatut.libelle }}</p>
+          <p><strong>Module:</strong> {{ selectedStatut.module }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

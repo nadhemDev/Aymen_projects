@@ -1,0 +1,134 @@
+<div class="auth-wrapper">
+  <div class="auth-content">
+    <div class="card">
+      <div class="row align-items-center text-center">
+        <div class="col-md-12">
+          <div class="card-body">
+            <img src="assets/images/logo-dark.png" alt="" class="img-fluid mb-4">
+            <h4 class="mb-3 f-w-400">Create Account</h4>
+            
+            <!-- Error Message -->
+            <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-3">
+              {{ errorMessage }}
+              <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+            </div>
+            
+            <!-- Success Message -->
+            <div *ngIf="successMessage" class="alert alert-success mb-3">
+              {{ successMessage }}
+            </div>
+            
+            <!-- Signup Form -->
+            <form #signupForm="ngForm" (ngSubmit)="onSubmit(signupForm)" novalidate>
+              
+              <!-- Name -->
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="feather icon-user"></i></span>
+                </div>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="Your Name"
+                  name="name"
+                  [(ngModel)]="formData.name"
+                  required
+                  #name="ngModel"
+                />
+              </div>
+              <div *ngIf="name.invalid && name.touched" class="text-danger small text-left mb-2">
+                Name is required
+              </div>
+              
+              <!-- Email -->
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="feather icon-mail"></i></span>
+                </div>
+                <input 
+                  type="email" 
+                  class="form-control" 
+                  placeholder="Email Address"
+                  name="email"
+                  [(ngModel)]="formData.email"
+                  required
+                  #email="ngModel"
+                />
+              </div>
+              <div *ngIf="email.invalid && email.touched" class="text-danger small text-left mb-2">
+                <div *ngIf="email.errors && email.errors.required">Email is required</div>
+                <div *ngIf="email.errors && email.errors.email">Please enter a valid email</div>
+              </div>
+              
+              <!-- Password -->
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="feather icon-lock"></i></span>
+                </div>
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  placeholder="Password (min. 6 characters)"
+                  name="password"
+                  [(ngModel)]="formData.password"
+                  required
+                  minlength="6"
+                  #password="ngModel"
+                />
+              </div>
+              <div *ngIf="password.invalid && password.touched" class="text-danger small text-left mb-2">
+                <div *ngIf="password.errors && password.errors.required">Password is required</div>
+                <div *ngIf="password.errors && password.errors.minlength">Password must be at least 6 characters</div>
+              </div>
+              
+              <!-- Confirm Password -->
+              <div class="input-group mb-4">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="feather icon-lock"></i></span>
+                </div>
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  placeholder="Confirm Password"
+                  name="confirm_password"
+                  [(ngModel)]="formData.confirm_password"
+                  required
+                  #confirmPassword="ngModel"
+                />
+              </div>
+              <div *ngIf="confirmPassword.invalid && confirmPassword.touched" class="text-danger small text-left mb-2">
+                Please confirm your password
+              </div>
+              
+              <!-- Newsletter Checkbox (Optional) -->
+              <div class="form-group text-left mt-2 mb-4">
+                <div class="checkbox checkbox-primary d-inline">
+                  <input type="checkbox" name="newsletter" id="newsletter">
+                  <label for="newsletter" class="cr">Send me the Newsletter weekly.</label>
+                </div>
+              </div>
+              
+              <!-- Submit Button -->
+              <button 
+                type="submit" 
+                class="btn btn-primary btn-block mb-4"
+                [disabled]="isLoading"
+              >
+                <span *ngIf="!isLoading">Sign up</span>
+                <span *ngIf="isLoading">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Creating Account...
+                </span>
+              </button>
+            </form>
+            
+            <p class="mb-2">
+              Already have an account? 
+              <a [routerLink]="['/auth/signin']" class="f-w-400">Sign In</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

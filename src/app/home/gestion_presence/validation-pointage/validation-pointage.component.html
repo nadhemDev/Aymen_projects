@@ -1,0 +1,104 @@
+<div class="calendar-wrapper">
+    <button class="nav-arrow" (click)="previousWeeks()">‹</button>
+  
+    <div class="calendar">
+      <button *ngFor="let semaine of semainesVisible"
+              [class.active]="semaine.isCurrent"
+              (click)="selectSemaine(semaine)">
+        <div class="semaine-label">Semaine {{ semaine.numero }}</div>
+        <div class="semaine-date">{{ semaine.dateRange }}</div>
+      </button>
+    </div>
+  
+    <button class="nav-arrow" (click)="nextWeeks()">›</button>
+  </div>
+  <div class="saisie-container">
+    <div class="saisie-table">
+        <table>
+            <thead>
+              <tr>
+                <!-- Présence/Absence -->
+                <th class="presence-absence-header">
+                  <div class="pa-squares">
+                    <div class="carre static">Présence</div>
+                    <div class="carre static">Absence</div>
+                  </div>
+                </th>
+          
+                <!-- Colonnes jours -->
+                <th *ngFor="let jour of selectedSemaine.jours">
+                  {{ jour.nomJour }}<br>{{ jour.date | date:'dd/MM' }}
+                </th>
+          
+                <!-- Colonne validation -->
+                <th>Valider</th>
+              </tr>
+            </thead>
+          
+            <tbody>
+              <tr *ngFor="let utilisateur of utilisateurs" 
+              [class.locked-row]="utilisateur.estVerrouille">
+                          <!-- Colonne nom + 40/0 -->
+                <td class="presence-absence-body-cell" [class.locked-row]="utilisateur.estVerrouille">
+                  <!-- Icône cadenas -->
+                
+                
+                  <!-- Icône bookmark -->
+                  <i class="bi" 
+                     [ngClass]="utilisateur.estValide ? 'bi-bookmark-fill save-icon valid' : 'bi-bookmark-fill save-icon'">
+                  </i>
+                
+                  <!-- Nom utilisateur -->
+                  <span class="user-name">{{ utilisateur.name }}</span>
+                
+                  <div class="pa-squares">
+                    <div class="carre statics">40</div>
+                    <div class="carre statics">0</div>
+                  </div>
+                  <i class="bi"
+                  [ngClass]="utilisateur.estVerrouille ? 'bi-lock-fill lock-icon' : 'bi-unlock-fill lock-icon'"
+                  (click)="toggleLock(utilisateur)">
+               </i>
+                </td>
+                
+                
+                
+                
+          
+                <!-- Colonnes jours -->
+                <td *ngFor="let jour of selectedSemaine.jours" [class.weekend-cell]="jour.nomJour === 'Sat' || jour.nomJour === 'Sun'">
+                    <ng-container *ngIf="jour.nomJour !== 'Sat' && jour.nomJour !== 'Sun'; else weekendCell">
+                      <div class="carre-container">
+                        <div class="carre"
+                             [class.selected]="isHeureSelectionnee(utilisateur.id, jour.date, 'matin')"
+                             (click)="toggleHeure(utilisateur.id, jour.date, 'matin')">4</div>
+                        <div class="carre"
+                             [class.selected]="isHeureSelectionnee(utilisateur.id, jour.date, 'apresMidi')"
+                             (click)="toggleHeure(utilisateur.id, jour.date, 'apresMidi')">4</div>
+                      </div>
+                    </ng-container>
+                    <ng-template #weekendCell>
+                        <div class="carre-container weekend-empty"></div>
+                      </ng-template>
+                  </td>
+          
+                <!-- Cellule checkbox validation -->
+                <td class="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="utilisateur.estValide"
+                    (ngModelChange)="onCheckboxChange(utilisateur)"
+                  />
+                </td>
+                
+              </tr>
+            </tbody>
+          </table>
+          
+  </div>
+  <div class="btn-actions">
+    <button (click)="remettre()" class="remettre-btn">Renvoyer </button>
+    <button class="valider-btn" [disabled]="!utilisateurSelectionne" (click)="validerPresence(utilisateurSelectionne)">Valider</button>
+  </div>
+  
+  </div>

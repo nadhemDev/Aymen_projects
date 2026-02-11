@@ -1,0 +1,15 @@
+.modal-dialog {
+    position: absolute;
+    top: 20%; /* Ajuste cette valeur pour contrôler la position verticale */
+    left: 30%;
+    transform: translateX(-50%); /* Garder le modal centré horizontalement */
+    width: 40%; /* Laisse la largeur dynamique définie par modal-lg */
+  }
+  /* Styles personnalisés pour le header de la table */
+.table thead {
+    background-color: #a39f9f;  /* Couleur de fond plus sombre */
+    color: #ffffff;  /* Texte en blanc pour contraster */
+  }
+
+  
+  

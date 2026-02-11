@@ -1,0 +1,20 @@
+<div class="container">
+    <form (ngSubmit)="onSubmit()" #relProjetForm="ngForm">
+        <div class="mb-3">
+            <label for="id_RelProjet" class="form-label">ID relation projet </label>
+            <input type="text" class="form-control" id="id_RelProjet" name="id_RelProjet" [(ngModel)]="relationprojet.id_RelProjet">
+          </div>    
+      <div class="mb-3">
+        <label for="libelle" class="form-label">Libellé</label>
+        <input type="text" class="form-control" id="libelle" name="libelle" [(ngModel)]="relationprojet.libelle" required>
+      </div>
+  
+  
+      <!-- Boutons -->
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary" [disabled]="!relProjetForm.valid">Ajouter</button>
+        <button type="button" class="btn btn-secondary ms-2" (click)="onCancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+  

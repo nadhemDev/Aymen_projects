@@ -1,0 +1,23 @@
+<div class="container">
+    <form (ngSubmit)="onSubmit()" #prioriteForm="ngForm">
+  
+      <div class="mb-3">
+        <label for="id_prio" class="form-label">ID Priorité</label>
+        <input type="text" class="form-control" id="id_prio" name="id_prio" [(ngModel)]="priorite.id_prio">
+      </div>
+  
+      <div class="mb-3">
+        <label for="liblle" class="form-label">Libellé</label>
+        <input type="text" class="form-control" id="liblle" name="liblle" [(ngModel)]="priorite.liblle" required>
+      </div>
+  
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary" [disabled]="!prioriteForm.valid">
+          {{ initialPriorite ? 'Modifier' : 'Ajouter' }}
+        </button>
+        <button type="button" class="btn btn-secondary ms-2" (click)="onCancel()">Annuler</button>
+      </div>
+      
+    </form>
+  </div>
+  

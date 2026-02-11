@@ -1,0 +1,28 @@
+<div class="container">
+    <form (ngSubmit)="onSubmit()" #statutForm="ngForm">
+  
+      <div class="mb-3">
+        <label for="id_statut" class="form-label">ID Statut</label>
+        <input type="text" class="form-control" id="id_statut" name="id_statut" [(ngModel)]="statut.id_statut">
+      </div>
+  
+      <div class="mb-3">
+        <label for="libelle" class="form-label">Libellé</label>
+        <input type="text" class="form-control" id="libelle" name="libelle" [(ngModel)]="statut.libelle" required>
+      </div>
+  
+      <div class="mb-3">
+        <label for="module" class="form-label">Module</label>
+        <input type="text" class="form-control" id="module" name="module" [(ngModel)]="statut.module" required>
+      </div>
+      <div>
+        <!-- Utilisation de d-flex pour aligner les boutons à droite -->
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary" [disabled]="!statutForm.valid">Ajouter</button>
+          <button type="button" class="btn btn-secondary ms-2" (click)="onCancel()">Annuler</button>
+        </div>
+      </div>
+      
+    </form>
+  </div>
+  

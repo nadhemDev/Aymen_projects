@@ -1,0 +1,454 @@
+.budget-section {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: #f9f9f9;
+    padding: 16px;
+    border-radius: 8px;
+  }
+  
+  // =======================
+  // Tableau principal
+  // =======================
+  .budget-table {
+    flex: 1;
+    max-width: calc(100% - 320px);
+  }
+  
+  .budget-table table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 800px;
+    text-align: center;
+  }
+  
+  .budget-table thead {
+    background-color: #e0e0e0;
+    font-weight: bold;
+  }
+  
+  .budget-table th, .budget-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  // surbrillance mois actuel
+  .mois-actuel {
+    background-color: #ffd6d6 !important;
+    color: #7c0303;
+    font-weight: bold;
+  }
+  
+  .mois-actuel span {
+    display: block;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  
+  // ligne Margin Project
+  .budget-table tbody tr:nth-child(3) {
+    background-color: #eef7ff;
+  }
+  
+  
+  // =======================
+  // Tableau "margin at completion"
+  // =======================
+  .completion-table {
+    width: 280px;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    background-color: white;
+  }
+  
+  .completion-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .completion-table thead {
+    background-color: #0f78d4;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .completion-table th, .completion-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+  }
+  .report-header {
+    background-color: #e0e0e0;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .selectors {
+    display: flex;
+    gap: 16px;
+  
+    select {
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  }
+  
+  .generate-btn {
+    background-color: #0f78d4;
+    color: white;
+    font-weight: bold;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s ease;
+  
+    &:hover {
+      background-color: #0d5fa8;
+    }
+  }
+  .gantt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  
+    select {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+  }
+  
+  .gantt-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  .gantt-table-wrapper.scrollable {
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+    padding-bottom: 0.5rem;
+  
+    table {
+      width: auto; /* Important pour scroll horizontal */
+      border-collapse: collapse;
+    }
+  }
+  
+  .gantt-table th, .gantt-table td {
+    min-width: 80px; /* largeur minimum des colonnes semaine */
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 0.3rem 0.5rem;
+  }
+  
+  .gantt-table th:first-child, .gantt-table td:first-child {
+    min-width: 150px; /* colonne collaborator un peu plus large */
+    text-align: left;
+    background-color: #f9f9f9;
+  }
+  
+  .gantt-table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 900px;
+  
+    th, td {
+      border: 1px solid #ccc;
+      text-align: center;
+      min-width: 100px;
+      height: 40px;
+      padding: 4px;
+    }
+  
+    th {
+      background-color: #f5f5f5;
+    }
+  
+    .bar {
+      background-color: #2196f3;
+      color: white;
+      font-size: 12px;
+      padding: 4px;
+      border-radius: 4px;
+    }
+  }
+  .week-days-container {
+    display: flex; /* horizontal, ou flex-direction: column si tu veux vertical */
+    justify-content: space-between;
+    gap: 4px; /* espace entre rectangles */
+  }
+  
+  .day-rect {
+    border: 1px solid #ccc;
+    background-color: #f0f4f8;
+    padding: 6px 8px;
+    min-width: 50px;
+    text-align: center;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    font-size: 12px;
+  }
+  
+  .day-label {
+    font-weight: bold;
+  }
+  
+  .day-date {
+    color: #666;
+    font-size: 11px;
+  }
+  /* Styles pour désactiver la colonne */
+/* Styles pour désactiver la colonne */
+
+.mois-actuel {
+  background-color: #e0f7fa;
+  font-weight: bold;
+}
+
+.scrollable {
+  overflow-x: auto;
+}
+
+.week-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.week-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.calendar-th {
+  position: relative;
+}
+
+.calendar-popup {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  z-index: 1000;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+  padding: 10px;
+  border-radius: 8px;
+}
+::ng-deep .calendar-custom-pos .mat-datepicker-content {
+  transform: translate(100px, -300px) !important; /* ajuste X (droite) et Y (haut) */
+  z-index: 9999 !important;
+}
+
+::ng-deep .calendar-custom-pos {
+  position: fixed !important;
+  top: 400px !important;   // ajuste en fonction du bouton
+  left: 500px !important; // ajuste pour l'avoir à droite
+  z-index: 9999 !important;
+  background-color: #eef7ff;
+}
+
+.fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #1976d2;
+  color: white;
+  font-size: 32px;
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+ // z-index: 1000;
+  transition: background-color 0.3s;
+}
+
+.fab:hover {
+  background-color: #125ea3;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background: white;
+  padding: 20px;
+  width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  font-family: Arial, sans-serif;
+}
+
+.modal-container h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.modal-container label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.modal-container select,
+.modal-container input[type="date"],
+.modal-container input[type="text"] {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.date-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.date-row > div {
+  flex: 1;
+}
+
+.buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background-color: #5c6bc0;
+  color: white;
+}
+
+.btn-primary:disabled {
+  background-color: #a0a7d6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #ddd;
+  color: #333;
+}
+.success-snackbar {
+  background-color: #4caf50 !important; /* Vert */
+  color: white !important;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.error-snackbar {
+  background-color: #f44336; /* Rouge */
+  color: white;
+}
+/* Conteneur de la grille PV */
+.pv-grid {
+  display: flex;
+  gap: 20px; /* espace entre les types */
+  flex-wrap: wrap;
+  margin: 15px 0;
+}
+
+/* Chaque type PV */
+.pv-type {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px;
+  flex: 1 1 200px; /* largeur flexible mais minimum 200px */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Titre du type */
+.pv-type h4 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #1976d2;
+}
+
+/* Grille des sous-options */
+.pv-sub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+/* Boutons des sous-options */
+.pv-sub-grid button {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Hover */
+.pv-sub-grid button:hover {
+  background-color: #e0f0ff;
+  border-color: #1976d2;
+  transform: translateY(-2px);
+}
+
+/* Bouton sélectionné */
+.pv-sub-grid button.selected {
+  background-color: #1976d2;
+  color: #fff;
+  border-color: #115293;
+  font-weight: bold;
+}
+.bar-container {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  background-color: #eee;
+  border-radius: 4px;
+}
+
+.bar {
+  height: 100%;
+  background-color: #ccc;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.bar.active {
+  background-color: #4caf50;
+}

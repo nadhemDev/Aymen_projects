@@ -1,0 +1,241 @@
+<!-- SECTION: Sélection projet et année -->
+<div class="report-header">
+  <div class="selectors">
+    <label>Projet</label>
+    <select [(ngModel)]="selectedProject" (change)="onProjectChange()">
+      <option *ngFor="let projet of projects" [ngValue]="projet.id">{{ projet.nom }}</option>
+    </select>
+    
+    
+
+    <select [(ngModel)]="selectedYear" (change)="onYearChange()">
+      <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+    </select>
+  </div>
+
+  <button class="generate-btn" (click)="generateReport()">
+    + Générer le rapport
+  </button>
+</div>
+
+<!-- SECTION: Tableau mensuel de performance -->
+<div class="budget-section">
+  <div class="budget-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th *ngFor="let m of mois; let i = index" [ngClass]="{ 'mois-actuel': i === moisActuelIndex }">
+            {{ m }}
+            <span *ngIf="i === moisActuelIndex">↓</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Prod</td>
+          <td *ngFor="let m of mois; let i = index" [ngClass]="{ 'mois-actuel': i === moisActuelIndex }">1000</td>
+        </tr>
+        <tr>
+          <td>Cost</td>
+          <td *ngFor="let m of mois; let i = index" [ngClass]="{ 'mois-actuel': i === moisActuelIndex }">700</td>
+        </tr>
+        <tr>
+          <td>Margin Project %</td>
+          <td *ngFor="let m of mois; let i = index" [ngClass]="{ 'mois-actuel': i === moisActuelIndex }">30%</td>
+        </tr>
+        <tr>
+          <td>% Marge</td>
+          <td *ngFor="let m of mois; let i = index" [ngClass]="{ 'mois-actuel': i === moisActuelIndex }">
+            30%
+            <span *ngIf="i === moisActuelIndex">↑</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tableau Margin at Completion -->
+  <div class="completion-table">
+    <table>
+      <thead>
+        <tr>
+          <th colspan="2">Margin at Completion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Total Prod</td><td>12000</td></tr>
+        <tr><td>Total Cost</td><td>8400</td></tr>
+        <tr><td>Total MP</td><td>3600</td></tr>
+        <tr><td>MP %</td><td>30%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION: En-tête Gantt -->
+<div class="gantt-header">
+  <label>{{ moisActuel }} {{ selectedYear }} - Collaborators Activity</label>
+</div>
+
+<!-- SECTION: Gantt Planning Collaborateurs -->
+<div class="gantt-table-wrapper scrollable">
+  <table class="gantt-table">
+    <thead>
+      <tr>
+        <th>Collaborator</th>
+        <th *ngFor="let week of weeks">
+          <div class="week-header">
+            <span>{{ week.label }}</span>
+            <button (click)="toggleWeek(week)" class="week-toggle-btn">
+              <mat-icon>{{ week.enabled ? 'lock_open' : 'lock' }}</mat-icon>
+            </button>
+          </div>
+        </th>
+      </tr>
+      <tr>
+        <th style="text-align: center;">
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 8px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            width: fit-content;
+            margin: 0 auto;
+          ">
+            <input matInput 
+                   [matDatepicker]="picker" 
+                   hidden 
+                   (dateChange)="onWeekSelected($event)">
+            
+            <mat-datepicker-toggle [for]="picker" disableRipple>
+              <button mat-icon-button style="color: #1976d2;">
+                <mat-icon>calendar_today</mat-icon>
+              </button>
+            </mat-datepicker-toggle>
+        
+      
+          
+
+      </div>
+        </th>
+        
+        <th *ngFor="let week of weeks" [class.disabled]="!week.enabled">
+          <div class="week-days-container">
+            <div class="day-rect" *ngFor="let day of getWeekDays(week.start)">
+              <div class="day-label">{{ day.label }}</div>
+              <div class="day-date">{{ day.date | date:'MM-dd' }}</div>
+            </div>
+          </div>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let collab of filteredCollaborators">
+        <td>{{ collab.user?.name || collab.name || '—' }}</td>
+        <td *ngFor="let week of weeks" [class.disabled]="!week.enabled">
+          <div class="bar">
+            {{ workloads[collab.name] ? workloads[collab.name][week.label] : '0 / 262' }}
+          </div>
+        </td>
+        
+      </tr>
+      
+      
+      
+      
+    </tbody>
+  </table>
+  <!-- Bouton flottant circulaire -->
+<button class="fab" (click)="openCollaboratorModal()">
+  +
+</button>
+
+</div>
+
+<!-- Modal: Add Collaborator -->
+<div class="modal-overlay" *ngIf="isModalOpen">
+  <div class="modal-container">
+    <h3>Ajouter un Collaborateur</h3>
+
+    <form #collaboratorForm="ngForm" (ngSubmit)="onSubmit(collaboratorForm)">
+      <label>Collaborator</label>
+      <select [(ngModel)]="selectedCollaborator" name="collaborator" required>
+        <option value="" disabled>Select Collaborator</option>
+        <option *ngFor="let collab of collaborateurs" [value]="collab.id">
+          {{ collab.name }}
+        </option>
+        
+      </select>
+
+      <label>Activity Type</label>
+      <select [(ngModel)]="selectedActivityType" name="activityType" required>
+        <option value="" disabled selected>Select Activity Type</option>
+        <option *ngFor="let type of activityTypes" [value]="type">{{ type }}</option>
+      </select>
+      <label>Activity</label>
+      <select [(ngModel)]="selectedActivity" name="activity" required>
+        <option value="" disabled>Select Activity</option>
+        <option *ngFor="let act of activities" [value]="act.id">
+          {{ act.nomactivite }}
+        </option>
+      </select>
+      
+      <label>Projet</label>
+      <select [(ngModel)]="selectedProject" name="project" required>
+        <option value="" disabled selected>Sélectionner un projet</option>
+        <option *ngFor="let project of projects" [value]="project.id">
+          {{ project.nom }}
+        </option>
+      </select>
+      
+      <label>Post</label>
+<select [(ngModel)]="selectedPost" name="post" required>
+  <option value="" disabled selected>Select Post</option>
+  <option value="Post A">Post A</option>
+  <option value="Post B">Post B</option>
+  <option value="Post C">Post C</option>
+</select>
+
+<label>PV:</label>
+
+<div class="pv-grid">
+  <div *ngFor="let pv of pvOptions" class="pv-type">
+    <h4>{{ pv.type }}</h4>
+    <div class="pv-sub-grid">
+      <button *ngFor="let sub of pv.subOptions"
+              type="button"
+              [class.selected]="selectedPVSub === sub"
+              (click)="selectPVSub(sub)">
+        {{ sub.code }} - ${{ sub.cost }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<p *ngIf="selectedPVSub">Sélectionné: {{ selectedPVSub.code }} - ${{ selectedPVSub.cost }}</p>
+
+
+      <div class="date-row">
+        <div>
+          <label>Start Date</label>
+          <input type="date" [(ngModel)]="startDate" name="startDate" required>
+        </div>
+        <div>
+          <label>End Date</label>
+          <input type="date" [(ngModel)]="endDate" name="endDate" required>
+        </div>
+      </div>
+
+      <!-- <input type="text" [(ngModel)]="average" name="average" placeholder="Average"> -->
+
+      <div class="buttons">
+        <button type="submit" [disabled]="!collaboratorForm.valid" class="btn btn-primary">Save Activity</button>
+        <button type="button" class="btn btn-secondary" (click)="closeCollaboratorModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

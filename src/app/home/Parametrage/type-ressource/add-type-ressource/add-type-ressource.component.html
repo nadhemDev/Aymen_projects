@@ -1,0 +1,26 @@
+<div class="container">
+    <form (ngSubmit)="onSubmit()" #typeressourceForm="ngForm">
+      
+      <!-- ID Typeressource -->
+      <div class="mb-3">
+        <label for="id_typeressource" class="form-label">ID Typeressource</label>
+        <input type="text" class="form-control" id="id_typeressource" name="id_typeressource" [(ngModel)]="typeressource.id_typeressource" required>
+      </div>
+  
+      <!-- Libelle -->
+      <div class="mb-3">
+        <label for="libelle" class="form-label">Libellé</label>
+        <input type="text" class="form-control" id="libelle" name="libelle" [(ngModel)]="typeressource.libelle" required>
+      </div>
+  
+      <!-- Boutons -->
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary" [disabled]="!typeressourceForm.valid">
+          {{ initialtyperessource ? 'Modifier' : 'Ajouter' }}
+        </button>
+        <button type="button" class="btn btn-secondary ms-2" (click)="onCancel()">Annuler</button>
+      </div>
+      
+    </form>
+  </div>
+  

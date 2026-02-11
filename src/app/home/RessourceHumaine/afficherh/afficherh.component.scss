@@ -1,0 +1,18 @@
+.modal-dialog {
+    position: absolute;
+    top: 10%;
+    left: 30%;
+    transform: translateX(-50%);
+    width: 40%;
+  }
+  
+  .table thead {
+    background-color: #a39f9f;
+    color: #ffffff;
+  }
+  
+  .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  

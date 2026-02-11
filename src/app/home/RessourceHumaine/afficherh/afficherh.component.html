@@ -1,0 +1,218 @@
+<div class="row">
+  <div class="col-sm-12">
+    <!-- Barre de recherche + boutons Importer / Ajouter alignés à droite -->
+    <div class="row mt-4">
+      <div class="col-sm-12">
+        <div class="d-flex justify-content-end align-items-center mb-3" style="margin-top: 80px">
+          <div class="d-flex align-items-center" style="gap: 10px;">
+            <!-- Champ de recherche aligné à droite -->
+            <div class="input-group" style="max-width: 250px;">
+              <input type="text" class="form-control" placeholder="Rechercher..." [(ngModel)]="searchText">
+              <span class="input-group-text">
+                <i class="feather icon-search"></i>
+              </span>
+            </div>
+  
+            <!-- Bouton Importer -->
+            <button type="button" class="btn btn-primary d-flex align-items-center text-nowrap" (click)="openImportModal()">
+              <i class="feather icon-upload me-1"></i>
+              <span>Importer Ressource</span>
+            </button>
+  
+            <!-- Bouton Ajouter -->
+            <button type="button" class="btn btn-success d-flex align-items-center text-nowrap" (click)="openModal()">
+              <i class="feather icon-plus me-1"></i>
+              <span>Ajouter Ressource Humaine</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Déplacer la carte plus bas avec un margin-top -->
+        <app-card cardTitle="Liste des Ressources">
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered text-center">
+              <thead class="align-middle">
+                <tr>
+                  <th class="text-center">Nom</th>
+                  <th class="text-center">Contrat</th>
+                  <th class="text-center">Activité</th>
+                  <th class="text-center">Email</th>
+                  <th class="text-center">Téléphone</th>
+                  <th class="text-center">Groupe ID</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let statut of filteredRessourcehumaines">
+                  <td class="align-middle">{{ statut.nom }}</td>
+                  <td class="align-middle">{{ statut.contrat }}</td>
+                  <td class="align-middle">{{ statut.activite }}</td>
+                  <td class="align-middle">{{ statut.email }}</td>
+                  <td class="align-middle">{{ statut.gsm }}</td>
+                  <td class="align-middle">{{ statut.id_grp }}</td>
+                  <td class="align-middle">
+                    <button type="button" class="btn btn-icon btn-warning me-2" (click)="editStatut(statut)">
+                      <i class="feather icon-edit-2"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-danger me-2" (click)="confirmDelete(statut.id)">
+                      <i class="feather icon-trash-2"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-info" (click)="openDetailModal(statut)">
+                      <i class="feather icon-info"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+
+        <!-- ADDED: History Section -->
+        <app-card cardTitle="Historique des Imports" class="mt-4">
+          <div class="table-responsive">
+            <table class="table table-sm table-striped table-bordered text-center">
+              <thead class="table-dark align-middle">
+                <tr>
+                  <th>Date Import</th>
+                  <th>Nom Fichier</th>
+                  <th>Records</th>
+                  <th>Année</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let h of history">
+                  <td>{{ h.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ h.file_name }}</td>
+                  <td><span class="badge bg-primary">{{ h.record_count }}</span></td>
+                  <td><span class="badge bg-info">{{ h.file_year }}</span></td>
+                </tr>
+                <tr *ngIf="history.length === 0">
+                  <td colspan="4" class="text-muted">Aucun historique d'import</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+        <!-- END ADDED -->
+
+        <!-- Modal de modification ou ajout -->
+        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showModal }" role="dialog" *ngIf="showModal">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">
+                  {{ editingRessource ? 'Modifier le Statut' : 'Ajouter une ressource' }}
+                </h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+              </div>
+              <div class="modal-body">
+                <app-add-rh 
+                  [initialRessource]="editingRessource" 
+                  (close)="closeModal()" 
+                  (ongrouperessourceAdded)="refreshList()">
+                </app-add-rh>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de confirmation de suppression -->
+        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showConfirmModal }" role="dialog" *ngIf="showConfirmModal">
+          <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" (click)="closeConfirmModal()"></button>
+              </div>
+              <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cette Ressource ?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeConfirmModal()">Annuler</button>
+                <button type="button" class="btn btn-danger" (click)="deleteStatut(selectedRessourceId)">Supprimer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal d'import - ADDED year input -->
+        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showImportModal }" role="dialog" *ngIf="showImportModal">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Importer des Ressources Humaines</h5>
+                <button type="button" class="btn-close" (click)="closeImportModal()"></button>
+              </div>
+              <div class="modal-body">
+                <!-- ADDED: Year input -->
+                <div class="mb-3">
+                  <label for="yearInput" class="form-label">Année du fichier</label>
+                  <input type="number" class="form-control" id="yearInput" [(ngModel)]="importYear" min="2000" max="2100">
+                </div>
+                <!-- END ADDED -->
+                <div class="mb-3">
+                  <label for="fileInput" class="form-label">Sélectionner fichier Excel (.xlsx, .csv)</label>
+                  <input type="file" class="form-control" id="fileInput" accept=".xlsx,.csv" (change)="onFileSelected($event)">
+                </div>
+                <div class="alert alert-info">
+                  <strong>Colonnes requises:</strong> nom, email, gsm, datedebut, datefin<br>
+                  <strong>Colonnes optionnelles:</strong> matricule, contrat, ressource, etc.
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeImportModal()">Annuler</button>
+                <button type="button" class="btn btn-primary" (click)="importFile()" [disabled]="!selectedFile">Importer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de détail -->
+        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showDetailModal }" role="dialog" *ngIf="showDetailModal">
+          <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Détails de la Ressource Humaine</h5>
+                <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
+              </div>
+              <div class="modal-body" *ngIf="selectedRessource">
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>ID :</strong> {{ selectedRessource.id }}</p>
+                    <p><strong>Nom :</strong> {{ selectedRessource.nom }}</p>
+                    <p><strong>Matricule :</strong> {{ selectedRessource.matricule }}</p>
+                    <p><strong>Email :</strong> {{ selectedRessource.email }}</p>
+                    <p><strong>Contrat :</strong> {{ selectedRessource.contrat }}</p>
+                    <p><strong>Ressource :</strong> {{ selectedRessource.ressource }}</p>
+                    <p><strong>Lieu de travail :</strong> {{ selectedRessource.lieuxtravail }}</p>
+                    <p><strong>BU Collaborateur :</strong> {{ selectedRessource.bucollaborateur }}</p>
+                    <p><strong>BU Affectation :</strong> {{ selectedRessource.buaffectation }}</p>
+                    <p><strong>Date début :</strong> {{ selectedRessource.datedebut }}</p>
+                    <p><strong>Date fin :</strong> {{ selectedRessource.datefin }}</p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Durée :</strong> {{ selectedRessource.duree }}</p>
+                    <p><strong>Activité :</strong> {{ selectedRessource.activite }}</p>
+                    <p><strong>Commercial :</strong> {{ selectedRessource.commercial }}</p>
+                    <p><strong>Nouvelle mission :</strong> {{ selectedRessource.nouvellmission }}</p>
+                    <p><strong>Secteur d'activité :</strong> {{ selectedRessource.secteuractrivite }}</p>
+                    <p><strong>Ferme optionnel :</strong> {{ selectedRessource.fermeoptionnel }}</p>
+                    <p><strong>Localisation :</strong> {{ selectedRessource.localisation }}</p>
+                    <p><strong>Télétravail :</strong> {{ selectedRessource.teletravail }}</p>
+                    <p><strong>Zone A :</strong> {{ selectedRessource.zoneA }}</p>
+                    <p><strong>Zone B :</strong> {{ selectedRessource.zoneB }}</p>
+                    <p><strong>Zone C :</strong> {{ selectedRessource.zoneC }}</p>
+                    <p><strong>Commentaire :</strong> {{ selectedRessource.commentaire }}</p>
+                    <p><strong>Téléphone :</strong> {{ selectedRessource.gsm }}</p>
+                    <p><strong>Groupe ID :</strong> {{ selectedRessource.id_grp }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

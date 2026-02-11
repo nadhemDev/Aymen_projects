@@ -1,0 +1,87 @@
+<div class="calendar-wrapper">
+  <button class="nav-arrow" (click)="previousWeeks()">‹</button>
+
+  <div class="calendar">
+    <button *ngFor="let semaine of semainesVisible"
+            [class.active]="semaine.isCurrent"
+            (click)="selectSemaine(semaine)">
+      <div class="semaine-label">Semaine {{ semaine.numero }}</div>
+      <div class="semaine-date">{{ semaine.dateRange }}</div>
+    </button>
+  </div>
+
+  <button class="nav-arrow" (click)="nextWeeks()">›</button>
+</div>
+
+  
+  <!-- tableau de saisie -->
+  <div class="saisie-container">
+    <div class="saisie-table">
+      <table>
+        <thead>
+          <tr>
+            <!-- Colonne Présence/Absence -->
+            <th class="presence-absence-header">
+              <div class="pa-squares">
+                <div class="carre static">Présence</div>
+                <div class="carre static">Absence</div>
+              </div>
+            </th>
+            <!-- Colonnes jours -->
+            <th *ngFor="let jour of selectedSemaine.jours">
+              {{ jour.nomJour }}<br>{{ jour.date | date:'dd/MM' }}
+            </th>
+          </tr>
+        </thead>
+            <tbody>
+              <tr>
+                <!-- 1ère cellule : juste les carrés 40 et 0, alignés sous Présence/Absence -->
+                <td class="presence-absence-body-cell">
+                  <span class="user-name">{{ utilisateur.name }}</span>
+                  <div class="pa-squares">
+                    <!-- Total heures travaillées -->
+                    <div class="carre">{{ getTotalHeuresSemaine(utilisateur) }}</div>
+                    <!-- Heures d'absence -->
+                    <div class="carre">{{ getHeuresAbsence(utilisateur) }}</div>
+                  </div>
+                </td>
+                <!-- puis les colonnes des jours comme avant -->
+                <td *ngFor="let jour of selectedSemaine.jours" [class.weekend-cell]="jour.nomJour === 'Sat' || jour.nomJour === 'Sun'">
+                  <ng-container *ngIf="jour.nomJour !== 'Sat' && jour.nomJour !== 'Sun'; else weekendCell">
+                    <div class="carre-container">
+                      <div class="carre"
+                           [class.selected]="heuresSelectionnees[jour.date]?.matin"
+                           (click)="toggleHeure(jour.date, 'matin')">4</div>
+                      <div class="carre"
+                           [class.selected]="heuresSelectionnees[jour.date]?.apresMidi"
+                           (click)="toggleHeure(jour.date, 'apresMidi')">4</div>
+                    </div>
+                  </ng-container>
+                  <ng-template #weekendCell>
+                    <div class="carre-container weekend-empty"></div>
+                  </ng-template>
+                </td>
+                
+              </tr>
+            </tbody>
+    
+        
+      </table>
+    
+    </div>
+  
+    <!-- graphique de solde / tickets -->
+    <div class="charts-row">
+      <div class="chart-col">
+        <app-apex-chart chartID="pie-chart-2-cac" [chartConfig]="chartDB.pie2CAC"></app-apex-chart>
+      </div>
+      <div class="chart-col">
+        <app-apex-chart chartID="gauge-chart-tr" [chartConfig]="chartDB.gaugeTR"></app-apex-chart>
+      </div>
+    </div>
+    
+    <button (click)="valider()" class="valider-btn btn-droite">Soumettre avant validation</button>
+
+  
+  </div>
+  

@@ -1,0 +1,18 @@
+table th,
+table td {
+  vertical-align: middle;
+}
+
+button.btn-sm {
+  transition: all 0.2s ease-in-out;
+}
+
+button.btn-sm:hover {
+  transform: scale(1.1);
+}
+
+.table-sm th,
+.table-sm td {
+  padding: 0.3rem;
+  font-size: 0.85rem;
+}

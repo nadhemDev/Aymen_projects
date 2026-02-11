@@ -1,0 +1,198 @@
+<div class="row">
+  <div class="col-sm-12">
+    <app-card cardTitle="">
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px;">
+        <button class="btn btn-success btn-sm"
+                (click)="openModal()"
+                style="padding: 4px 12px; font-size: 13px;">
+          + Insérer jour férié
+        </button>
+      
+        <button class="btn btn-info btn-sm"
+                (click)="consulterJoursFeries()"
+                style="padding: 4px 12px; font-size: 13px;">
+          📅 Consulter jours fériés
+        </button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+        <input type="text" 
+               placeholder="Rechercher un utilisateur..." 
+               [(ngModel)]="searchTerm" 
+               (ngModelChange)="filtrerPresences()"
+               class="form-control" 
+               style="width: 250px; font-size: 13px;"/>
+      </div>
+      
+      <!-- Conteneur des filtres centré -->
+<!-- Conteneur des filtres centré -->
+<div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
+
+  <!-- Ligne Mois + Flèches intégrées -->
+  <div style="display: flex; align-items: center; justify-content: center; gap: 0px;">
+    <button (click)="changerMois(-1)" 
+            class="btn btn-primary btn-sm" 
+            style="border-radius: 4px 0 0 4px;"
+            title="Mois précédent">
+      &#x25C0;
+    </button>
+
+    <input type="month" 
+    id="moisSelectionne" 
+    [(ngModel)]="moisSelectionne"
+    (change)="changerMois(0)" 
+    class="form-control" 
+    style="width: 160px; text-align: center; border-radius: 0;">
+
+
+    
+    <button (click)="changerMois(1)" 
+            class="btn btn-primary btn-sm" 
+            style="border-radius: 0 4px 4px 0;"
+            title="Mois suivant">
+      &#x25B6;
+    </button>
+  </div>
+
+  <!-- Ligne Du / Au + bouton Afficher -->
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <label for="dateDebut">Du</label>
+    <input type="date" id="dateDebut" [(ngModel)]="dateDebut"
+           class="form-control" style="width: 140px;">
+
+    <label for="dateFin">Au</label>
+    <input type="date" id="dateFin" [(ngModel)]="dateFin"
+           class="form-control" style="width: 140px;">
+
+    <button class="btn btn-danger"
+            (click)="chargerPresences()"
+            style="width: 140px; font-size: 13px; padding: 2px 10px;">
+      Afficher
+    </button>
+  </div>
+</div>
+
+
+      <!-- Tableau -->
+      <table border="1" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <!-- Ligne des noms de jours -->
+          <tr style="background-color: #0056b3; color: white;">
+            <th rowspan="2">Employé</th>
+            <th *ngFor="let jour of joursDuMois">{{ getNomJour(jour) }}</th>
+            <th rowspan="2">Jour Travaillé</th>
+            <th rowspan="2">Jour Ouvrée</th>
+          </tr>
+      
+          <!-- Ligne des numéros de jours -->
+          <tr style="background-color: #004085; color: white;">
+            <th *ngFor="let jour of joursDuMois">{{ jour | number:'2.0' }}</th>
+          </tr>
+        </thead>
+      
+        <tbody>
+          <tr *ngFor="let user of presencesData">
+            <!-- Nom employé -->
+            <td>{{ user.nom }}</td>
+      
+            <!-- Présences -->
+            <td *ngFor="let jour of joursDuMois"
+            [ngStyle]="{
+              'background-color': estJourFerie(jour) ? '#ffc107' :
+                                  isWeekend(jour) ? '#dee2e6' :
+                                  getColor(user.presences[jour])
+            }"
+            style="text-align: center; padding: 2px 5px; cursor: default;">
+          {{ estJourFerie(jour) ? 'Férié' : (user.presences[jour] || '') }}
+        </td>
+        
+      
+            <!-- Jours travaillés -->
+            <td style="text-align: center;">
+              {{ user.joursTravailles }}
+            </td>
+            <td style="text-align: center;">
+              {{ user.joursOuvres }}
+            </td>
+            
+          </tr>
+        </tbody>
+      </table>
+      
+      
+      
+    </app-card>
+  </div>
+</div>
+<!-- Modal -->
+<!-- Modal personnalsé -->
+<div class="custom-modal-overlay" *ngIf="showModal">
+  <div class="custom-modal">
+    <h5>{{ selectedJourFerie ? 'Modifier un jour férié' : 'Ajouter un jour férié' }}</h5>
+
+    <form [formGroup]="jourFerieForm" (ngSubmit)="soumettreJourFerie()">
+      <div class="mb-2">
+        <label>Nom</label>
+        <input class="form-control" formControlName="nom" required>
+      </div>
+
+      <div class="mb-2">
+        <label>Date férié</label>
+        <input type="date" class="form-control" formControlName="date_ferie" required>
+      </div>
+
+      <div class="mb-2">
+        <label>Année</label>
+        <input class="form-control" formControlName="annee" required>
+      </div>
+
+      <div class="mb-2">
+        <label>Description</label>
+        <textarea class="form-control" formControlName="description"></textarea>
+      </div>
+
+      <div class="text-end">
+        <button type="submit" class="btn btn-primary btn-sm" [disabled]="jourFerieForm.invalid">
+          {{ selectedJourFerie ? 'Modifier' : 'Ajouter' }}
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm ms-2" (click)="closeModal()">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal liste des jours fériés -->
+<div class="custom-modal-overlay" *ngIf="showListeFerieModal">
+  <div class="custom-modal" style="max-width: 600px; width: 90%;">
+    <h5>Liste des jours fériés</h5>
+
+    <table class="table table-bordered table-sm" style="font-size: 13px;">
+      <thead class="table-active">
+        <tr>
+          <th>Nom</th>
+          <th>Date</th>
+          <th>Année</th>
+          <th>Description</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let jour of joursFeries">
+          <td>{{ jour.nom }}</td>
+          <td>{{ jour.date_ferie | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ jour.annee }}</td>
+          <td>{{ jour.description }}</td>
+          <td class="text-center">
+            <button class="btn btn-link btn-sm p-0" (click)="modifierJourFerie(jour)" title="Modifier">
+              <i class="fa fa-edit" aria-hidden="true"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Alignement garanti à droite -->
+    <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+      <button class="btn btn-secondary btn-sm" (click)="showListeFerieModal = false">Fermer</button>
+    </div>
+  </div>
+</div>
