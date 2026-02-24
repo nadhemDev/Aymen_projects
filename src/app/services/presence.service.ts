@@ -2,12 +2,15 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { PresencesResponse } from '../home/Models/Presence';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';  // ✅ ADD THIS
 
 @Injectable({
   providedIn: 'root',
 })
 export class PresenceService {
-  private baseUrl = 'http://localhost:8000/api';  // Ajout du baseUrl
+  
+  // ✅ USE ENVIRONMENT URL
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -28,7 +31,7 @@ export class PresenceService {
     let params = new HttpParams()
       .set('user_id', userId.toString());
     dates.forEach(date => {
-      params = params.append('dates[]', date); // Utiliser 'dates[]' pour que Laravel le reçoive comme un tableau
+      params = params.append('dates[]', date);
     });
 
     return this.http.get(`${this.baseUrl}/presence/getbydates`, { headers, params });
@@ -51,6 +54,7 @@ export class PresenceService {
   validerPresences(presences: { user_id: number; date: string }[]) {
     return this.http.post(`${this.baseUrl}/projet/presence/valider`, { presences });
   }
+
   getJoursTravailles(userId: number, mois: number, annee: number): Observable<any> {
     const headers = this.getAuthHeaders();
     const params = new HttpParams()
@@ -69,6 +73,7 @@ export class PresenceService {
   
     return this.http.get<PresencesResponse>(`${this.baseUrl}/projet/presence/getPresencesParMois`, { headers, params });
   }
+
   getJoursOuvres(userId: number, mois: number, annee: number): Observable<any> {
     const headers = this.getAuthHeaders();
     const params = new HttpParams()
@@ -79,7 +84,6 @@ export class PresenceService {
     return this.http.get(`${this.baseUrl}/projet/presence/joursouvres`, { headers, params });
   }
   
-  
   getJourFerie(): Observable<any> {
     return this.http.get(`${this.baseUrl}/jourferie/affichejourferie`);
   }
@@ -87,8 +91,8 @@ export class PresenceService {
   addJourFerie(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/jourferie/addjourferie`, data);
   }
+
   updatejourferie(id: number, data: any): Observable<any> {
     return this.http.put(`${this.baseUrl}/jourferie/updatejourferie/${id}`, data);
   }
-
 }

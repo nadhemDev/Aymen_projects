@@ -4,13 +4,11 @@
 
 export const environment = {
   production: false,
-   baseUrl: 'http://localhost:8000',
-  apiUrl: 'http://localhost:8000/api',
-  pusherKey: 'your_dev_key',
+  baseUrl: 'http://localhost:8000',
+  apiUrl: 'http://127.0.0.1:8000/api',
+ 
   hideTuto: false
-
 };
-
 /*
  * For easier debugging in development mode, you can import the following file
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.

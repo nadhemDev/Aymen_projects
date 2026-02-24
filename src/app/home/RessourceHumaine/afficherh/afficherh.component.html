@@ -1,218 +1,537 @@
 <div class="row">
   <div class="col-sm-12">
-    <!-- Barre de recherche + boutons Importer / Ajouter alignés à droite -->
-    <div class="row mt-4">
-      <div class="col-sm-12">
-        <div class="d-flex justify-content-end align-items-center mb-3" style="margin-top: 80px">
-          <div class="d-flex align-items-center" style="gap: 10px;">
-            <!-- Champ de recherche aligné à droite -->
-            <div class="input-group" style="max-width: 250px;">
-              <input type="text" class="form-control" placeholder="Rechercher..." [(ngModel)]="searchText">
-              <span class="input-group-text">
-                <i class="feather icon-search"></i>
-              </span>
-            </div>
-  
-            <!-- Bouton Importer -->
-            <button type="button" class="btn btn-primary d-flex align-items-center text-nowrap" (click)="openImportModal()">
-              <i class="feather icon-upload me-1"></i>
-              <span>Importer Ressource</span>
+    <app-card cardTitle="Ressources Humaines">
+
+      <!-- TABS NAVIGATION -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab === 'resources'" (click)="activeTab = 'resources'">
+            <i class="feather icon-users me-1"></i> Ressources Humaines
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab === 'history'" (click)="switchToHistoryTab()">
+            <i class="feather icon-clock me-1"></i> Historique des Imports
+          </button>
+        </li>
+      </ul>
+
+      <!-- TAB 1: RESOURCES -->
+      <div *ngIf="activeTab === 'resources'">
+        
+        <!-- Search and Actions -->
+        <div class="p-3 bg-light rounded mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div class="flex-grow-1" style="max-width: 300px;">
+            <input 
+              type="text" 
+              class="form-control form-control-sm" 
+              placeholder="Rechercher..." 
+              [(ngModel)]="searchText"
+              (input)="filterResources()">
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-square btn-success" (click)="openImportModal()" title="Importer un fichier">
+              <i class="feather icon-upload"></i>
             </button>
-  
-            <!-- Bouton Ajouter -->
-            <button type="button" class="btn btn-success d-flex align-items-center text-nowrap" (click)="openModal()">
-              <i class="feather icon-plus me-1"></i>
-              <span>Ajouter Ressource Humaine</span>
+            <button class="btn btn-square btn-primary" (click)="openModal()" title="Ajouter une ressource">
+              <i class="feather icon-plus"></i>
             </button>
           </div>
         </div>
 
-        <!-- Déplacer la carte plus bas avec un margin-top -->
-        <app-card cardTitle="Liste des Ressources">
+        <!-- Import Button -->
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-secondary" (click)="openImportModal()">
+            📤 Charger un fichier Excel
+          </button>
+        </div>
+
+        <!-- DATA TABLE -->
+        <div class="table-responsive" style="width: 100%;">
+          <table class="table table-bordered table-striped text-center" style="width: 100%; min-width: 1200px; white-space: nowrap;">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>GSM</th>
+                <th>Contrat</th>
+                <th>Activité</th>
+                <th>Date Début</th>
+                <th>Date Fin</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let rh of paginatedResources">
+                <td>{{ rh.id }}</td>
+                <td>{{ rh.nom }}</td>
+         <td>
+  <a [href]="'mailto:' + rh.email" class="email-link">
+    <i class="feather icon-mail"></i>{{ rh.email }}
+  </a>
+</td>
+                <td>{{ rh.gsm }}</td>
+                <td>{{ rh.contrat }}</td>
+                <td>{{ rh.activite }}</td>
+                <td>{{ rh.date_debut | date:'dd/MM/yyyy' }}</td>
+                <td>{{ rh.date_fin | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-info me-1" (click)="openDetailModal(rh)" title="Détails">
+                    <i class="feather icon-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-warning me-1" (click)="openEditModal(rh)" title="Modifier">
+                    <i class="feather icon-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="confirmDelete(rh.id)" title="Supprimer">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="paginatedResources.length === 0">
+                <td colspan="9" class="text-muted py-3">
+                  Aucune ressource humaine trouvée
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION RESOURCES -->
+        <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="totalItems > 0">
+          <div>
+            <span class="text-muted">
+              Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} entrées
+            </span>
+          </div>
+          
+          <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm" style="width: auto;" [(ngModel)]="itemsPerPage" (change)="onPageSizeChange(itemsPerPage)">
+              <option [value]="10">10 / page</option>
+              <option [value]="20">20 / page</option>
+              <option [value]="50">50 / page</option>
+            </select>
+
+            <nav>
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                  <button class="page-link" (click)="onPageChange(1)">
+                    <i class="feather icon-chevrons-left"></i>
+                  </button>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                  <button class="page-link" (click)="onPageChange(currentPage - 1)">
+                    <i class="feather icon-chevron-left"></i>
+                  </button>
+                </li>
+                <li class="page-item active">
+                  <span class="page-link">{{ currentPage }}</span>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage >= getTotalPages()">
+                  <button class="page-link" (click)="onPageChange(currentPage + 1)">
+                    <i class="feather icon-chevron-right"></i>
+                  </button>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage >= getTotalPages()">
+                  <button class="page-link" (click)="onPageChange(getTotalPages())">
+                    <i class="feather icon-chevrons-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+      </div><!-- End Resources Tab -->
+
+      <!-- TAB 2: HISTORIQUE DES IMPORTS -->
+      <div *ngIf="activeTab === 'history'">
+
+        <!-- Statistics -->
+        <div class="row mb-4" *ngIf="history.length > 0">
+          <div class="col-md-4">
+            <div class="card text-white bg-primary">
+              <div class="card-body text-center">
+                <h6 class="card-title">Total des lignes importées</h6>
+                <h3 class="mb-0">{{ getHistoryStats().totalRecords }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white bg-success">
+              <div class="card-body text-center">
+                <h6 class="card-title">Nombre d'imports</h6>
+                <h3 class="mb-0">{{ getHistoryStats().totalImports }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white bg-warning">
+              <div class="card-body text-center">
+                <h6 class="card-title">Années différentes</h6>
+                <h3 class="mb-0">{{ getHistoryStats().uniqueYears }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="historyLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-2">Chargement de l'historique...</p>
+        </div>
+
+        <!-- History Table -->
+        <div *ngIf="!historyLoading">
           <div class="table-responsive">
-            <table class="table table-striped table-bordered text-center">
-              <thead class="align-middle">
+            <table class="table table-bordered table-striped">
+              <thead class="table-dark">
                 <tr>
-                  <th class="text-center">Nom</th>
-                  <th class="text-center">Contrat</th>
-                  <th class="text-center">Activité</th>
-                  <th class="text-center">Email</th>
-                  <th class="text-center">Téléphone</th>
-                  <th class="text-center">Groupe ID</th>
-                  <th class="text-center">Action</th>
+                  <th width="180">Date Import</th>
+                  <th>Nom Fichier</th>
+                  <th width="120" class="text-center">Records</th>
+                  <th width="120" class="text-center">Année</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let statut of filteredRessourcehumaines">
-                  <td class="align-middle">{{ statut.nom }}</td>
-                  <td class="align-middle">{{ statut.contrat }}</td>
-                  <td class="align-middle">{{ statut.activite }}</td>
-                  <td class="align-middle">{{ statut.email }}</td>
-                  <td class="align-middle">{{ statut.gsm }}</td>
-                  <td class="align-middle">{{ statut.id_grp }}</td>
-                  <td class="align-middle">
-                    <button type="button" class="btn btn-icon btn-warning me-2" (click)="editStatut(statut)">
-                      <i class="feather icon-edit-2"></i>
-                    </button>
-                    <button type="button" class="btn btn-icon btn-danger me-2" (click)="confirmDelete(statut.id)">
-                      <i class="feather icon-trash-2"></i>
-                    </button>
-                    <button type="button" class="btn btn-icon btn-info" (click)="openDetailModal(statut)">
-                      <i class="feather icon-info"></i>
-                    </button>
+                <tr *ngFor="let item of paginatedHistory">
+                  <td>{{ item.date_import || item.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    <i class="feather icon-file-text me-2 text-primary"></i>
+                    {{ item.nom_fichier || item.filename }}
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary rounded-pill">{{ item.records || item.record_count || 0 }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success">{{ item.annee || item.year || '-' }}</span>
+                  </td>
+                </tr>
+                <tr *ngIf="paginatedHistory.length === 0">
+                  <td colspan="4" class="text-center text-muted py-4">
+                    <i class="feather icon-inbox" style="font-size: 48px;"></i>
+                    <p class="mt-2">Aucun import trouvé dans l'historique</p>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </app-card>
 
-        <!-- ADDED: History Section -->
-        <app-card cardTitle="Historique des Imports" class="mt-4">
-          <div class="table-responsive">
-            <table class="table table-sm table-striped table-bordered text-center">
-              <thead class="table-dark align-middle">
-                <tr>
-                  <th>Date Import</th>
-                  <th>Nom Fichier</th>
-                  <th>Records</th>
-                  <th>Année</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let h of history">
-                  <td>{{ h.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
-                  <td>{{ h.file_name }}</td>
-                  <td><span class="badge bg-primary">{{ h.record_count }}</span></td>
-                  <td><span class="badge bg-info">{{ h.file_year }}</span></td>
-                </tr>
-                <tr *ngIf="history.length === 0">
-                  <td colspan="4" class="text-muted">Aucun historique d'import</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </app-card>
-        <!-- END ADDED -->
-
-        <!-- Modal de modification ou ajout -->
-        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showModal }" role="dialog" *ngIf="showModal">
-          <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">
-                  {{ editingRessource ? 'Modifier le Statut' : 'Ajouter une ressource' }}
-                </h5>
-                <button type="button" class="btn-close" (click)="closeModal()"></button>
-              </div>
-              <div class="modal-body">
-                <app-add-rh 
-                  [initialRessource]="editingRessource" 
-                  (close)="closeModal()" 
-                  (ongrouperessourceAdded)="refreshList()">
-                </app-add-rh>
-              </div>
+          <!-- PAGINATION HISTORY -->
+          <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="historyTotalItems > 0">
+            <div>
+              <span class="text-muted">
+                Affichage de {{ (historyCurrentPage - 1) * historyItemsPerPage + 1 }} à {{ Math.min(historyCurrentPage * historyItemsPerPage, historyTotalItems) }} sur {{ historyTotalItems }} imports
+              </span>
             </div>
+            
+            <div class="d-flex align-items-center gap-2">
+              <select class="form-select form-select-sm" style="width: auto;" [(ngModel)]="historyItemsPerPage" (change)="onHistoryPageSizeChange(historyItemsPerPage)">
+                <option [value]="10">10 / page</option>
+                <option [value]="20">20 / page</option>
+                <option [value]="50">50 / page</option>
+              </select>
+
+              <nav>
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item" [class.disabled]="historyCurrentPage === 1">
+                    <button class="page-link" (click)="onHistoryPageChange(1)">
+                      <i class="feather icon-chevrons-left"></i>
+                    </button>
+                  </li>
+                  <li class="page-item" [class.disabled]="historyCurrentPage === 1">
+                    <button class="page-link" (click)="onHistoryPageChange(historyCurrentPage - 1)">
+                      <i class="feather icon-chevron-left"></i>
+                    </button>
+                  </li>
+                  <li class="page-item active">
+                    <span class="page-link">{{ historyCurrentPage }}</span>
+                  </li>
+                  <li class="page-item" [class.disabled]="historyCurrentPage >= getHistoryTotalPages()">
+                    <button class="page-link" (click)="onHistoryPageChange(historyCurrentPage + 1)">
+                      <i class="feather icon-chevron-right"></i>
+                    </button>
+                  </li>
+                  <li class="page-item" [class.disabled]="historyCurrentPage >= getHistoryTotalPages()">
+                    <button class="page-link" (click)="onHistoryPageChange(getHistoryTotalPages())">
+                      <i class="feather icon-chevrons-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+
+          <!-- Refresh Button -->
+          <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-primary" (click)="loadHistory()" [disabled]="historyLoading">
+              <i class="feather icon-refresh-cw" [class.spin]="historyLoading"></i>
+              Actualiser
+            </button>
           </div>
         </div>
 
-        <!-- Modal de confirmation de suppression -->
-        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showConfirmModal }" role="dialog" *ngIf="showConfirmModal">
-          <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Confirmer la suppression</h5>
-                <button type="button" class="btn-close" (click)="closeConfirmModal()"></button>
-              </div>
-              <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer cette Ressource ?</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeConfirmModal()">Annuler</button>
-                <button type="button" class="btn btn-danger" (click)="deleteStatut(selectedRessourceId)">Supprimer</button>
-              </div>
+      </div><!-- End History Tab -->
+
+      <!-- DELETE CONFIRMATION MODAL -->
+      <div class="modal fade show d-block" tabindex="-1" *ngIf="showConfirmModal" style="background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title">
+                <i class="feather icon-alert-triangle"></i> Confirmation de suppression
+              </h5>
+              <button type="button" class="btn-close btn-close-white" (click)="closeConfirmModal()"></button>
+            </div>
+            <div class="modal-body">
+              <p>
+                Êtes-vous sûr de vouloir supprimer cette ressource humaine <strong>#{{ selectedRessourceId }}</strong> ?
+              </p>
+              <p class="text-danger mb-0">
+                <small>Cette action est irréversible.</small>
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" (click)="closeConfirmModal()">Annuler</button>
+              <button class="btn btn-danger" (click)="deleteStatut(selectedRessourceId)">
+                <i class="feather icon-trash-2"></i> Supprimer
+              </button>
             </div>
           </div>
         </div>
-
-        <!-- Modal d'import - ADDED year input -->
-        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showImportModal }" role="dialog" *ngIf="showImportModal">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Importer des Ressources Humaines</h5>
-                <button type="button" class="btn-close" (click)="closeImportModal()"></button>
-              </div>
-              <div class="modal-body">
-                <!-- ADDED: Year input -->
-                <div class="mb-3">
-                  <label for="yearInput" class="form-label">Année du fichier</label>
-                  <input type="number" class="form-control" id="yearInput" [(ngModel)]="importYear" min="2000" max="2100">
-                </div>
-                <!-- END ADDED -->
-                <div class="mb-3">
-                  <label for="fileInput" class="form-label">Sélectionner fichier Excel (.xlsx, .csv)</label>
-                  <input type="file" class="form-control" id="fileInput" accept=".xlsx,.csv" (change)="onFileSelected($event)">
-                </div>
-                <div class="alert alert-info">
-                  <strong>Colonnes requises:</strong> nom, email, gsm, datedebut, datefin<br>
-                  <strong>Colonnes optionnelles:</strong> matricule, contrat, ressource, etc.
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeImportModal()">Annuler</button>
-                <button type="button" class="btn btn-primary" (click)="importFile()" [disabled]="!selectedFile">Importer</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal de détail -->
-        <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showDetailModal }" role="dialog" *ngIf="showDetailModal">
-          <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Détails de la Ressource Humaine</h5>
-                <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
-              </div>
-              <div class="modal-body" *ngIf="selectedRessource">
-                <div class="row">
-                  <div class="col-md-6">
-                    <p><strong>ID :</strong> {{ selectedRessource.id }}</p>
-                    <p><strong>Nom :</strong> {{ selectedRessource.nom }}</p>
-                    <p><strong>Matricule :</strong> {{ selectedRessource.matricule }}</p>
-                    <p><strong>Email :</strong> {{ selectedRessource.email }}</p>
-                    <p><strong>Contrat :</strong> {{ selectedRessource.contrat }}</p>
-                    <p><strong>Ressource :</strong> {{ selectedRessource.ressource }}</p>
-                    <p><strong>Lieu de travail :</strong> {{ selectedRessource.lieuxtravail }}</p>
-                    <p><strong>BU Collaborateur :</strong> {{ selectedRessource.bucollaborateur }}</p>
-                    <p><strong>BU Affectation :</strong> {{ selectedRessource.buaffectation }}</p>
-                    <p><strong>Date début :</strong> {{ selectedRessource.datedebut }}</p>
-                    <p><strong>Date fin :</strong> {{ selectedRessource.datefin }}</p>
-                  </div>
-                  <div class="col-md-6">
-                    <p><strong>Durée :</strong> {{ selectedRessource.duree }}</p>
-                    <p><strong>Activité :</strong> {{ selectedRessource.activite }}</p>
-                    <p><strong>Commercial :</strong> {{ selectedRessource.commercial }}</p>
-                    <p><strong>Nouvelle mission :</strong> {{ selectedRessource.nouvellmission }}</p>
-                    <p><strong>Secteur d'activité :</strong> {{ selectedRessource.secteuractrivite }}</p>
-                    <p><strong>Ferme optionnel :</strong> {{ selectedRessource.fermeoptionnel }}</p>
-                    <p><strong>Localisation :</strong> {{ selectedRessource.localisation }}</p>
-                    <p><strong>Télétravail :</strong> {{ selectedRessource.teletravail }}</p>
-                    <p><strong>Zone A :</strong> {{ selectedRessource.zoneA }}</p>
-                    <p><strong>Zone B :</strong> {{ selectedRessource.zoneB }}</p>
-                    <p><strong>Zone C :</strong> {{ selectedRessource.zoneC }}</p>
-                    <p><strong>Commentaire :</strong> {{ selectedRessource.commentaire }}</p>
-                    <p><strong>Téléphone :</strong> {{ selectedRessource.gsm }}</p>
-                    <p><strong>Groupe ID :</strong> {{ selectedRessource.id_grp }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
-    </div>
+
+      <!-- DETAIL MODAL -->
+      <div class="modal fade show d-block" tabindex="-1" *ngIf="showDetailModal" style="background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+              <h5 class="modal-title">
+                <i class="feather icon-user"></i> Détails Ressource Humaine
+              </h5>
+              <button type="button" class="btn-close btn-close-white" (click)="closeDetailModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="selectedRessource">
+              <table class="table table-bordered">
+                <tr>
+                  <th>ID</th>
+                  <td>{{ selectedRessource.id }}</td>
+                </tr>
+                <tr>
+                  <th>Nom</th>
+                  <td>{{ selectedRessource.nom }}</td>
+                </tr>
+                <tr>
+                  <th>Email</th>
+                  <td>{{ selectedRessource.email }}</td>
+                </tr>
+                <tr>
+                  <th>GSM</th>
+                  <td>{{ selectedRessource.gsm }}</td>
+                </tr>
+                <tr>
+                  <th>Contrat</th>
+                  <td>{{ selectedRessource.contrat }}</td>
+                </tr>
+                <tr>
+                  <th>Activité</th>
+                  <td>{{ selectedRessource.activite }}</td>
+                </tr>
+                <tr>
+                  <th>Date Début</th>
+                  <td>{{ selectedRessource.date_debut | date:'dd/MM/yyyy' }}</td>
+                </tr>
+                <tr>
+                  <th>Date Fin</th>
+                  <td>{{ selectedRessource.date_fin | date:'dd/MM/yyyy' }}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" (click)="closeDetailModal()">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMPORT MODAL -->
+      <div class="modal fade show d-block" tabindex="-1" *ngIf="showImportModal" style="background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-fullscreen-lg-down" style="max-width: 98vw; height: 95vh; margin: 2vh auto;">
+          <div class="modal-content" style="height: 100%;">
+            <div class="modal-header">
+              <h5 class="modal-title">📤 Importer Ressources Humaines</h5>
+              <button type="button" class="btn-close" (click)="closeImportModal()"></button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;">
+              
+              <!-- Year Selection -->
+              <div class="mb-3">
+                <label class="form-label">Année d'import</label>
+                <input type="number" class="form-control" [(ngModel)]="importYear" placeholder="2024">
+              </div>
+
+              <!-- File Input -->
+              <div class="mb-3">
+                <label for="rhFile" class="form-label">Sélectionner un fichier Excel (.xlsx, .xls, .csv)</label>
+                <input type="file" class="form-control" id="rhFile" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)">
+              </div>
+              
+              <!-- File Preview -->
+              <div *ngIf="filePreview?.length > 0" class="table-responsive mt-3" style="max-height: 65vh; overflow: auto;">
+                <h6>Aperçu des données:</h6>
+                <table class="table table-sm table-bordered" style="white-space: nowrap; width: 100%;">              
+                  <thead>
+                    <tr>
+                      <th *ngFor="let header of fileHeaders">{{ header }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let row of filePreview">
+                      <td *ngFor="let cell of row">{{ cell }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" (click)="closeImportModal()">Annuler</button>
+              <button class="btn btn-success" (click)="importFile()" [disabled]="!selectedFile || uploadLoading">
+                <span *ngIf="uploadLoading" class="spinner-border spinner-border-sm me-2"></span>
+                Importer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD MODAL -->
+      <div class="modal fade show d-block" tabindex="-1" *ngIf="showModal" style="background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title">
+                <i class="feather icon-plus"></i> Ajouter Ressource Humaine
+              </h5>
+              <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+            </div>
+            <div class="modal-body">
+<form #addForm="ngForm" (ngSubmit)="saveNewResource()">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Nom</label>
+                    <input type="text" class="form-control" [(ngModel)]="newResource.nom" name="nom" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" [(ngModel)]="newResource.email" name="email" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">GSM</label>
+                    <input type="text" class="form-control" [(ngModel)]="newResource.gsm" name="gsm">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Contrat</label>
+                    <select class="form-control" [(ngModel)]="newResource.contrat" name="contrat">
+                      <option value="CDI">CDI</option>
+                      <option value="CDD">CDD</option>
+                      <option value="Stage">Stage</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Activité</label>
+                  <input type="text" class="form-control" [(ngModel)]="newResource.activite" name="activite">
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Date Début</label>
+                    <input type="date" class="form-control" [(ngModel)]="newResource.date_debut" name="date_debut">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Date Fin</label>
+                    <input type="date" class="form-control" [(ngModel)]="newResource.date_fin" name="date_fin">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+              <button class="btn btn-primary" (click)="saveNewResource()" [disabled]="!addForm?.valid">
+                <i class="feather icon-save"></i> Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT MODAL -->
+      <div class="modal fade show d-block" tabindex="-1" *ngIf="showEditModal" style="background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+              <h5 class="modal-title">
+                <i class="feather icon-edit"></i> Modifier Ressource Humaine
+              </h5>
+              <button type="button" class="btn-close btn-close-white" (click)="closeEditModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="editingRessource">
+<form #editForm="ngForm" (ngSubmit)="saveEdit()">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Nom</label>
+                    <input type="text" class="form-control" [(ngModel)]="editingRessource.nom" name="nom" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" [(ngModel)]="editingRessource.email" name="email" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">GSM</label>
+                    <input type="text" class="form-control" [(ngModel)]="editingRessource.gsm" name="gsm" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Contrat</label>
+                    <select class="form-control" [(ngModel)]="editingRessource.contrat" name="contrat">
+                      <option value="CDI">CDI</option>
+                      <option value="CDD">CDD</option>
+                      <option value="Stage">Stage</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Activité</label>
+                  <input type="text" class="form-control" [(ngModel)]="editingRessource.activite" name="activite">
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Date Début</label>
+                    <input type="date" class="form-control" [(ngModel)]="editingRessource.date_debut" name="date_debut">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Date Fin</label>
+                    <input type="date" class="form-control" [(ngModel)]="editingRessource.date_fin" name="date_fin">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" (click)="closeEditModal()">Annuler</button>
+              <button class="btn btn-warning" (click)="saveEdit()" [disabled]="!editForm?.valid">
+                <i class="feather icon-save"></i> Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </app-card>
   </div>
 </div>

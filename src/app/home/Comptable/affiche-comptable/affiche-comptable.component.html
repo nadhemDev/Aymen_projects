@@ -2,147 +2,308 @@
   <div class="col-sm-12">
     <app-card cardTitle="Comptabilité">
 
-      <!-- Formulaire + boutons -->
-      <div class="p-3 bg-light rounded mb-3 d-flex flex-wrap align-items-start justify-content-between">
-        <form class="form-filtres d-flex flex-wrap gap-2" #filtreForm="ngForm">
-          <div>
-            <select class="form-control form-control-sm" [(ngModel)]="selectedMois" name="mois">
-              <option value="" disabled selected>Mois</option>
-              <option *ngFor="let mois of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="mois">
-                {{ moisLabels[mois - 1] }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <input type="number" class="form-control form-control-sm" placeholder="Année" [(ngModel)]="selectedAnnee" name="annee">
-          </div>
-          <div>
-            <input type="date" class="form-control form-control-sm" [(ngModel)]="selectedDate" name="dateop">
-          </div>
-          <div>
-            <select class="form-control form-control-sm" [(ngModel)]="selectedStatut" name="statut">
-              <option value="" disabled selected>Statut</option>
-              <option *ngFor="let statut of statuts" [value]="statut.id_statut">
-                {{ statut.libelle }}
-              </option>
-            </select>
-          </div>
-        </form>
-
-        <div class="d-flex gap-2 mt-2 mt-sm-0">
-          <button class="btn btn-square btn-info" (click)="openImportHistoryModal()" title="Voir l'historique des imports">
-            <i class="feather icon-clock"></i>
+      <!-- TABS NAVIGATION - Angular handled -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab === 'operations'" (click)="activeTab = 'operations'">
+            <i class="feather icon-list me-1"></i> Opérations
           </button>
-          <button class="btn btn-square btn-success" (click)="openUploadModal()">
-            <i class="feather icon-plus"></i>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab === 'historique'" (click)="switchToHistoryTab()">
+            <i class="feather icon-clock me-1"></i> Historique des Imports
           </button>
-          <button class="btn btn-square btn-primary" (click)="consulterOperations()">
-            <i class="feather icon-eye"></i>
-          </button>
-        </div>
-      </div>
+        </li>
+      </ul>
 
-      <!-- Import Buttons -->
-      <div class="d-flex justify-content-end mb-3">
-        <button class="btn btn-secondary me-2" (click)="openUploadModal()">
-          📤 Charger un fichier Excel
-        </button>
-        <button class="btn btn-info" (click)="openImportHistoryModal()">
-          📋 Historique des Imports
-        </button>
-      </div>
-
-      <!-- ========== DATA TABLE (RESTORED) ========== -->
-       <!-- ========== DATA TABLE WITH PAGINATION ========== -->
-      <div class="table-responsive">
-        <table class="table table-bordered table-striped text-center">
-          <thead class="table-dark">
-            <tr>
-              <th>id_op</th>
-              <th>jhtrav</th>
-              <th>mnt_base</th>
-              <th>id_ressh</th>
-              <th>mnt_brut</th>
-              <th>mnt_cnss</th>
-              <th>mnt_salaireImp</th>
-              <th>mnt_irrp</th>
-              <th>mnt_acpt</th>
-              <th>mnt_pret</th>
-              <th>mnt_net</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of paginatedComptables">
-              <td>{{ item.id_op }}</td>
-              <td>{{ item.jhtrav }}</td>
-              <td>{{ item.mnt_base }}</td>
-              <td>{{ item.id_ressh }}</td>
-              <td>{{ item.mnt_brut }}</td>
-              <td>{{ item.mnt_cnss }}</td>
-              <td>{{ item.mnt_salaireImp }}</td>
-              <td>{{ item.mnt_irrp }}</td>
-              <td>{{ item.mnt_acpt }}</td>
-              <td>{{ item.mnt_pret }}</td>
-              <td>{{ item.mnt_net }}</td>
-            </tr>
-            <tr *ngIf="paginatedComptables.length === 0">
-              <td colspan="11" class="text-muted py-3">
-                Aucune opération trouvée
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- ========== PAGINATION CONTROLS ========== -->
-      <div *ngIf="totalItems > 0" class="d-flex justify-content-between align-items-center mt-3">
-        <div>
-          <span class="text-muted">
-            Affichage de {{ paginatedComptables.length }} sur {{ totalItems }} enregistrement(s) | 
-            Page {{ currentPage }} sur {{ getTotalPages() }}
-          </span>
-        </div>
+      <!-- TAB 1: OPERATIONS -->
+      <div *ngIf="activeTab === 'operations'">
         
-        <div class="d-flex align-items-center gap-2">
-          <select class="form-select form-select-sm" style="width: auto;" 
-                  [(ngModel)]="itemsPerPage" 
-                  (change)="onPageSizeChange(itemsPerPage)">
-            <option [value]="10">10 / page</option>
-            <option [value]="20">20 / page</option>
-            <option [value]="50">50 / page</option>
-            <option [value]="100">100 / page</option>
-          </select>
+        <!-- Formulaire + boutons -->
+        <div class="p-3 bg-light rounded mb-3 d-flex flex-wrap align-items-start justify-content-between">
+          <form class="form-filtres d-flex flex-wrap gap-2" #filtreForm="ngForm">
+            <div>
+              <select class="form-control form-control-sm" [(ngModel)]="selectedMois" name="mois">
+                <option value="" disabled selected>Mois</option>
+                <option *ngFor="let mois of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="mois">
+                  {{ moisLabels[mois - 1] }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <input type="number" class="form-control form-control-sm" placeholder="Année" [(ngModel)]="selectedAnnee" name="annee">
+            </div>
+            <div>
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="selectedDate" name="dateop">
+            </div>
+            <div>
+              <select class="form-control form-control-sm" [(ngModel)]="selectedStatut" name="statut">
+                <option value="" disabled selected>Statut</option>
+                <option *ngFor="let statut of statuts" [value]="statut.id_statut">
+                  {{ statut.libelle }}
+                </option>
+              </select>
+            </div>
+          </form>
 
-          <nav>
-            <ul class="pagination pagination-sm mb-0">
-              <li class="page-item" [class.disabled]="currentPage === 1">
-                <button class="page-link" (click)="onPageChange(1)">
-                  <i class="feather icon-chevrons-left"></i>
-                </button>
-              </li>
-              <li class="page-item" [class.disabled]="currentPage === 1">
-                <button class="page-link" (click)="onPageChange(currentPage - 1)">
-                  <i class="feather icon-chevron-left"></i>
-                </button>
-              </li>
-              <li class="page-item active">
-                <span class="page-link">{{ currentPage }}</span>
-              </li>
-              <li class="page-item" [class.disabled]="currentPage >= getTotalPages()">
-                <button class="page-link" (click)="onPageChange(currentPage + 1)">
-                  <i class="feather icon-chevron-right"></i>
-                </button>
-              </li>
-              <li class="page-item" [class.disabled]="currentPage >= getTotalPages()">
-                <button class="page-link" (click)="onPageChange(getTotalPages())">
-                  <i class="feather icon-chevrons-right"></i>
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <div class="d-flex gap-2 mt-2 mt-sm-0">
+            <button class="btn btn-square btn-success" (click)="openUploadModal()" title="Charger un fichier Excel">
+              <i class="feather icon-upload"></i>
+            </button>
+            <button class="btn btn-square btn-primary" (click)="consulterOperations()" title="Consulter">
+              <i class="feather icon-eye"></i>
+            </button>
+          </div>
         </div>
-      </div>
- <!-- ========== DELETE CONFIRMATION MODAL ========== -->
+
+        <!-- Import Button -->
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-secondary" (click)="openUploadModal()">
+            📤 Charger un fichier Excel
+          </button>
+        </div>
+  
+  
+
+        <!-- DATA TABLE -->
+        <div class="table-responsive" style="width: 100%;">
+          <table class="table table-bordered table-striped text-center" style="width: 100%; min-width: 1400px; white-space: nowrap;">
+            <thead class="table-dark">
+              <tr>
+                <th>id_op</th>
+                <th>jhtrav</th>
+                <th>mnt_base</th>
+                <th>id_ressh</th>
+                <th>mnt_brut</th>
+                <th>mnt_cnss</th>
+                <th>mnt_salaireImp</th>
+                <th>mnt_irp</th>
+                <th>mnt_css</th>
+                <th>mnt_acpt</th>
+                <th>mnt_pret</th>
+                <th>mnt_net</th>
+                <th>0,1707</th>  
+                <th>0,034</th>  
+                <th>130</th>  
+                <th>SCR</th> 
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of paginatedComptables">
+                <td>{{ item.id_op }}</td>
+                <td>{{ item.jhtrav }}</td>
+                <td>{{ item.mnt_base }}</td>
+                <td>{{ item.id_ressh }}</td>
+                <td>{{ item.mnt_brut }}</td>
+                <td>{{ item.mnt_cnss }}</td>
+                <td>{{ item.mnt_salaireImp }}</td>
+                <td>{{ item.mnt_irp }}</td>
+                <td>{{ item.mnt_css }}</td>
+                <td>{{ item.mnt_acpt }}</td>
+                <td>{{ item.mnt_pret }}</td>
+                <td>{{ item.mnt_net }}</td>
+                <td>0,1707</td>  
+                <td>0,034</td> 
+                <td>130</td>  
+                <td>{{ item.mnt_scr }}</td>
+              </tr>
+              <tr *ngIf="paginatedComptables.length === 0">
+                <td colspan="16" class="text-muted py-3">
+                  Aucune opération trouvée
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div *ngIf="totalItems > 0" class="d-flex justify-content-between align-items-center mt-3">
+          <div>
+            <span class="text-muted">
+              Affichage de {{ paginatedComptables.length }} sur {{ totalItems }} enregistrement(s) | 
+              Page {{ currentPage }} sur {{ getTotalPages() }}
+            </span>
+          </div>
+          
+          <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm" style="width: auto;" 
+                    [(ngModel)]="itemsPerPage" 
+                    (change)="onPageSizeChange(itemsPerPage)">
+              <option [value]="10">10 / page</option>
+              <option [value]="20">20 / page</option>
+              <option [value]="50">50 / page</option>
+              <option [value]="100">100 / page</option>
+            </select>
+
+            <nav>
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                  <button class="page-link" (click)="onPageChange(1)">
+                    <i class="feather icon-chevrons-left"></i>
+                  </button>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                  <button class="page-link" (click)="onPageChange(currentPage - 1)">
+                    <i class="feather icon-chevron-left"></i>
+                  </button>
+                </li>
+                <li class="page-item active">
+                  <span class="page-link">{{ currentPage }}</span>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage >= getTotalPages()">
+                  <button class="page-link" (click)="onPageChange(currentPage + 1)">
+                    <i class="feather icon-chevron-right"></i>
+                  </button>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage >= getTotalPages()">
+                  <button class="page-link" (click)="onPageChange(getTotalPages())">
+                    <i class="feather icon-chevrons-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+      </div><!-- End Operations Tab -->
+
+      <!-- TAB 2: HISTORIQUE DES IMPORTS -->
+      <div *ngIf="activeTab === 'historique'">
+
+        <!-- Statistics -->
+        <div class="row mb-4" *ngIf="importHistory.length > 0">
+          <div class="col-md-4">
+            <div class="card text-white bg-primary">
+              <div class="card-body text-center">
+                <h6 class="card-title">Total des lignes importées</h6>
+                <h3 class="mb-0">{{ getHistoryStats().totalRecords }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white bg-success">
+              <div class="card-body text-center">
+                <h6 class="card-title">Nombre d'imports</h6>
+                <h3 class="mb-0">{{ getHistoryStats().totalImports }}</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-white bg-warning">
+              <div class="card-body text-center">
+                <h6 class="card-title">Années différentes</h6>
+                <h3 class="mb-0">{{ getHistoryStats().uniqueYears }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="historyLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-2">Chargement de l'historique...</p>
+        </div>
+
+        <!-- History Table -->
+        <div *ngIf="!historyLoading">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th width="180">Date Import</th>
+                  <th>Nom Fichier</th>
+                  <th width="120" class="text-center">Records</th>
+                  <th width="120" class="text-center">Année</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of importHistory">
+                  <td>{{ item.date_import }}</td>
+                  <td>
+                    <i class="feather icon-file-text me-2 text-primary"></i>
+                    {{ item.nom_fichier }}
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary rounded-pill">{{ item.records }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success">{{ item.annee }}</span>
+                  </td>
+                </tr>
+                <tr *ngIf="importHistory.length === 0">
+                  <td colspan="4" class="text-center text-muted py-4">
+                    <i class="feather icon-inbox" style="font-size: 48px;"></i>
+                    <p class="mt-2">Aucun import trouvé dans l'historique</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div *ngIf="historyPagination.total > 0" class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              <span class="text-muted">
+                Affichage de {{ importHistory.length }} import(s) | 
+                Page {{ historyPagination.current }} sur {{ Math.ceil(historyPagination.total / historyPagination.pageSize) }}
+              </span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+              <select class="form-select form-select-sm" style="width: auto;" 
+                      [(ngModel)]="historyPagination.pageSize" 
+                      (change)="onHistoryPageSizeChange(historyPagination.pageSize)">
+                <option [value]="10">10 / page</option>
+                <option [value]="20">20 / page</option>
+                <option [value]="50">50 / page</option>
+              </select>
+
+              <nav>
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item" [class.disabled]="historyPagination.current === 1">
+                    <button class="page-link" (click)="onHistoryPageChange(1)">
+                      <i class="feather icon-chevrons-left"></i>
+                    </button>
+                  </li>
+                  <li class="page-item" [class.disabled]="historyPagination.current === 1">
+                    <button class="page-link" (click)="onHistoryPageChange(historyPagination.current - 1)">
+                      <i class="feather icon-chevron-left"></i>
+                    </button>
+                  </li>
+                  <li class="page-item active">
+                    <span class="page-link">{{ historyPagination.current }}</span>
+                  </li>
+                  <li class="page-item" [class.disabled]="historyPagination.current >= Math.ceil(historyPagination.total / historyPagination.pageSize)">
+                    <button class="page-link" (click)="onHistoryPageChange(historyPagination.current + 1)">
+                      <i class="feather icon-chevron-right"></i>
+                    </button>
+                  </li>
+                  <li class="page-item" [class.disabled]="historyPagination.current >= Math.ceil(historyPagination.total / historyPagination.pageSize)">
+                    <button class="page-link" (click)="onHistoryPageChange(Math.ceil(historyPagination.total / historyPagination.pageSize))">
+                      <i class="feather icon-chevrons-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+
+        <!-- Refresh Button -->
+        <div class="d-flex justify-content-end mt-3">
+          <button class="btn btn-primary" (click)="loadImportHistory(historyPagination.current)" [disabled]="historyLoading">
+            <i class="feather icon-refresh-cw" [class.spin]="historyLoading"></i>
+            Actualiser
+          </button>
+        </div>
+
+      </div><!-- End Historique Tab -->
+
+      <!-- MODALS (outside tabs) -->
+      
+      <!-- DELETE CONFIRMATION MODAL -->
       <div class="modal fade show d-block" tabindex="-1" *ngIf="showDeleteModal" style="background: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -174,197 +335,50 @@
         </div>
       </div>
 
+     <!-- ========== UPLOAD MODAL ========== -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showUploadModal" style="background: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-fullscreen-lg-down" style="max-width: 98vw; height: 95vh; margin: 2vh auto;">
+    <div class="modal-content" style="height: 100%;">
+      <div class="modal-header">
+        <h5 class="modal-title">📤 Charger un fichier Excel</h5>
+        <button type="button" class="btn-close" (click)="closeUploadModal()"></button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+        <div class="mb-3">
+          <label for="excelFile" class="form-label">Sélectionner un fichier Excel (.xlsx, .xls, .csv)</label>
+          <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)">
+        </div>
+        
+        <!-- File Preview - Full Width -->
+        <div *ngIf="filePreview?.length > 0" class="table-responsive mt-3" style="max-height: 65vh; overflow: auto;">
+          <table class="table table-sm table-bordered" style="white-space: nowrap; width: 100%;">              
+            <thead>
+              <tr>
+                <th *ngFor="let header of fileHeaders">{{ header }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of filePreview">
+                <td *ngFor="let cell of row">{{ cell }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <!-- ========== UPLOAD MODAL ========== -->
-      <div class="modal fade show d-block" tabindex="-1" *ngIf="showUploadModal" style="background: rgba(0, 0, 0, 0.5);">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">📤 Charger un fichier Excel</h5>
-              <button type="button" class="btn-close" (click)="closeUploadModal()"></button>
-            </div>
-            <div class="modal-body">
-              <div class="mb-3">
-                <label for="excelFile" class="form-label">Sélectionner un fichier Excel (.xlsx, .xls, .csv)</label>
-                <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event)">
-              </div>
-              
-              <!-- File Preview -->
-              <div *ngIf="filePreview.length > 0" class="table-responsive mt-3" style="max-height: 300px; overflow-y: auto;">
-                <h6>Aperçu des données:</h6>
-                <table class="table table-sm table-bordered">
-                  <thead>
-                    <tr>
-                      <th *ngFor="let header of fileHeaders">{{ header }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let row of filePreview">
-                      <td *ngFor="let cell of row">{{ cell }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div *ngIf="uploadError" class="alert alert-danger mt-3">
-                {{ uploadError }}
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="closeUploadModal()">Annuler</button>
-              <button class="btn btn-success" (click)="uploadFile()" [disabled]="!selectedFile || uploadLoading">
-                <span *ngIf="uploadLoading" class="spinner-border spinner-border-sm me-2"></span>
-                Importer
-              </button>
-            </div>
-          </div>
+        <div *ngIf="uploadError" class="alert alert-danger mt-3">
+          {{ uploadError }}
         </div>
       </div>
-
-      <!-- ========== IMPORT HISTORY MODAL (KEEP AS IS) ========== -->
-      <div class="modal fade show d-block" tabindex="-1" *ngIf="showImportHistoryModal" style="background: rgba(0, 0, 0, 0.5);">
-        <div class="modal-dialog modal-xl">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">📋 Historique des Imports</h5>
-              <button type="button" class="btn-close" (click)="closeImportHistoryModal()"></button>
-            </div>
-            <div class="modal-body">
-              
-              <!-- Statistics -->
-              <div class="row mb-4" *ngIf="importHistory.length > 0">
-                <div class="col-md-4">
-                  <div class="card text-white bg-primary">
-                    <div class="card-body text-center">
-                      <h6 class="card-title">Total des lignes importées</h6>
-                      <h3 class="mb-0">{{ getHistoryStats().totalRecords }}</h3>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="card text-white bg-success">
-                    <div class="card-body text-center">
-                      <h6 class="card-title">Nombre d'imports</h6>
-                      <h3 class="mb-0">{{ getHistoryStats().totalImports }}</h3>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="card text-white bg-warning">
-                    <div class="card-body text-center">
-                      <h6 class="card-title">Années différentes</h6>
-                      <h3 class="mb-0">{{ getHistoryStats().uniqueYears }}</h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Loading Spinner -->
-              <div *ngIf="historyLoading" class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Chargement...</span>
-                </div>
-                <p class="mt-2">Chargement de l'historique...</p>
-              </div>
-
-              <!-- History Table -->
-              <div *ngIf="!historyLoading">
-                <div class="table-responsive">
-                  <table class="table table-bordered table-striped">
-                    <thead class="table-dark">
-                      <tr>
-                        <th width="180">Date Import</th>
-                        <th>Nom Fichier</th>
-                        <th width="120" class="text-center">Records</th>
-                        <th width="120" class="text-center">Année</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr *ngFor="let item of importHistory">
-                        <td>{{ item.date_import }}</td>
-                        <td>
-                          <i class="feather icon-file-text me-2 text-primary"></i>
-                          {{ item.nom_fichier }}
-                        </td>
-                        <td class="text-center">
-                          <span class="badge bg-primary rounded-pill">{{ item.records }}</span>
-                        </td>
-                        <td class="text-center">
-                          <span class="badge bg-success">{{ item.annee }}</span>
-                        </td>
-                      </tr>
-                      <tr *ngIf="importHistory.length === 0">
-                        <td colspan="4" class="text-center text-muted py-4">
-                          <i class="feather icon-inbox" style="font-size: 48px;"></i>
-                          <p class="mt-2">Aucun import trouvé dans l'historique</p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <!-- Pagination -->
-                <div *ngIf="historyPagination.total > 0" class="d-flex justify-content-between align-items-center mt-3">
-                  <div>
-                    <span class="text-muted">
-                      Affichage de {{ importHistory.length }} import(s) | 
-                      Page {{ historyPagination.current }} sur {{ Math.ceil(historyPagination.total / historyPagination.pageSize) }}
-                    </span>
-                  </div>
-                  
-                  <div class="d-flex align-items-center gap-2">
-                    <select class="form-select form-select-sm" style="width: auto;" 
-                            [(ngModel)]="historyPagination.pageSize" 
-                            (change)="onHistoryPageSizeChange(historyPagination.pageSize)">
-                      <option [value]="10">10 / page</option>
-                      <option [value]="20">20 / page</option>
-                      <option [value]="50">50 / page</option>
-                    </select>
-
-                    <nav>
-                      <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item" [class.disabled]="historyPagination.current === 1">
-                          <button class="page-link" (click)="onHistoryPageChange(1)">
-                            <i class="feather icon-chevrons-left"></i>
-                          </button>
-                        </li>
-                        <li class="page-item" [class.disabled]="historyPagination.current === 1">
-                          <button class="page-link" (click)="onHistoryPageChange(historyPagination.current - 1)">
-                            <i class="feather icon-chevron-left"></i>
-                          </button>
-                        </li>
-                        <li class="page-item active">
-                          <span class="page-link">{{ historyPagination.current }}</span>
-                        </li>
-                        <li class="page-item" [class.disabled]="historyPagination.current >= Math.ceil(historyPagination.total / historyPagination.pageSize)">
-                          <button class="page-link" (click)="onHistoryPageChange(historyPagination.current + 1)">
-                            <i class="feather icon-chevron-right"></i>
-                          </button>
-                        </li>
-                        <li class="page-item" [class.disabled]="historyPagination.current >= Math.ceil(historyPagination.total / historyPagination.pageSize)">
-                          <button class="page-link" (click)="onHistoryPageChange(Math.ceil(historyPagination.total / historyPagination.pageSize))">
-                            <i class="feather icon-chevrons-right"></i>
-                          </button>
-                        </li>
-                      </ul>
-                    </nav>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="closeImportHistoryModal()">
-                Fermer
-              </button>
-              <button class="btn btn-primary" (click)="loadImportHistory(historyPagination.current)" [disabled]="historyLoading">
-                <i class="feather icon-refresh-cw" [class.spin]="historyLoading"></i>
-                Actualiser
-              </button>
-            </div>
-          </div>
-        </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeUploadModal()">Annuler</button>
+        <button class="btn btn-success" (click)="uploadFile()" [disabled]="!selectedFile || uploadLoading">
+          <span *ngIf="uploadLoading" class="spinner-border spinner-border-sm me-2"></span>
+          Importer
+        </button>
       </div>
-
+    </div>
+  </div>
+</div>
     </app-card>
   </div>
 </div>

@@ -26,6 +26,9 @@ import { NavigationItem } from './theme/layout/admin/navigation/navigation';
 import { NgbButtonsModule, NgbDropdownModule, NgbTabsetModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './services/auth-interceptor.service';
+import { ToastrModule } from 'ngx-toastr';
+import { NotificationService } from 'src/app/services/notification.service';
+
 
 @NgModule({
   declarations: [
@@ -43,6 +46,7 @@ import { AuthInterceptor } from './services/auth-interceptor.service';
     NavRightComponent,
     ConfigurationComponent,
     ToggleFullScreenDirective,
+
     
 
   ],
@@ -57,9 +61,26 @@ import { AuthInterceptor } from './services/auth-interceptor.service';
     NgbTabsetModule,
     HttpClientModule,
     FormsModule,
-    ReactiveFormsModule,
+    ToastrModule.forRoot({
+  timeOut: 5000,
+  positionClass: 'toast-top-right', // or try 'toast-bottom-right'
+  preventDuplicates: true,
+  progressBar: true,
+  closeButton: true,
+  enableHtml: true,
+  tapToDismiss: true,
+  newestOnTop: true,
+  maxOpened: 5,
+  autoDismiss: true,
+  toastClass: 'toast ngx-toastr',
+  titleClass: 'toast-title',
+  messageClass: 'toast-message',
+  extendedTimeOut: 1000,
+  progressAnimation: 'decreasing'
+})
   ],
-  providers: [NavigationItem, {
+  providers: [NavigationItem,
+      NotificationService, {
     provide: HTTP_INTERCEPTORS,
     useClass: AuthInterceptor,
     multi: true

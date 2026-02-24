@@ -1,46 +1,46 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
-// REMOVED SPACE at end
-const API_URL = 'http://127.0.0.1:8000/api/ressourcehumaine';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RessourcehumaineService {
+  
+  // ✅ Environment-based URL
+  private apiUrl = `${environment.apiUrl}/ressourcehumaine`;
 
   constructor(private http: HttpClient) {}
 
   getrh(): Observable<any> {
-    console.log('📤 GET request to:', `${API_URL}/getrh`);
-    return this.http.get(`${API_URL}/getrh`);
+    console.log('📤 GET request to:', `${this.apiUrl}/getrh`);
+    return this.http.get(`${this.apiUrl}/getrh`);
   }
 
   addrh(data: any): Observable<any> {
-    console.log('📤 POST request to:', `${API_URL}/addrh`);
+    console.log('📤 POST request to:', `${this.apiUrl}/addrh`);
     console.log('📦 POST data:', data);
-    return this.http.post(`${API_URL}/addrh`, data);
+    return this.http.post(`${this.apiUrl}/addrh`, data);
   }
 
   updaterh(id: number, data: any): Observable<any> {
-    console.log('📤 PUT request to:', `${API_URL}/updaterh/${id}`);
-    return this.http.put(`${API_URL}/updaterh/${id}`, data);
+    console.log('📤 PUT request to:', `${this.apiUrl}/updaterh/${id}`);
+    return this.http.put(`${this.apiUrl}/updaterh/${id}`, data);
   }
 
   deleterh(id: number): Observable<any> {
-    console.log('📤 DELETE request to:', `${API_URL}/deleterh/${id}`);
-    return this.http.delete(`${API_URL}/deleterh/${id}`);
+    console.log('📤 DELETE request to:', `${this.apiUrl}/deleterh/${id}`);
+    return this.http.delete(`${this.apiUrl}/deleterh/${id}`);
   }
 
-  // MOVED INSIDE CLASS - before the closing brace
   importRh(formData: FormData): Observable<any> {
-    console.log('📤 IMPORT request to:', `${API_URL}/import`);
-    return this.http.post(`${API_URL}/import`, formData);
+    console.log('📤 IMPORT request to:', `${this.apiUrl}/import`);
+    return this.http.post(`${this.apiUrl}/import`, formData);
   }
- getHistory(): Observable<any> {
-  return this.http.get(`http://127.0.0.1:8000/api/ressourcehumaine/history`);
+
+  getHistory(): Observable<any> {
+    console.log('📤 GET request to:', `${this.apiUrl}/history`);
+    return this.http.get(`${this.apiUrl}/history`);
+  }
 }
-  
- 
-} // <-- CLOSING BRACE IS HERE, AFTER importRh

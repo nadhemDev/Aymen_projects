@@ -2,27 +2,29 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-
-const API_URL = 'http://127.0.0.1:8000/api';
+import { environment } from '../../environments/environment';  // ✅ ADD THIS
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserserviceService {
+  
+  // ✅ USE ENVIRONMENT URL
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   // Login method with proper CORS headers
   login(credentials: { email: string; password: string }): Observable<any> {
-    console.log('Login attempt to:', `${API_URL}/auth`);
+    console.log('Login attempt to:', `${this.apiUrl}/auth`);
     console.log('Credentials:', credentials);
     
-    return this.http.post(`${API_URL}/auth`, credentials, {
+    return this.http.post(`${this.apiUrl}/auth`, credentials, {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }),
-      withCredentials: true  // Important for CORS with credentials
+      withCredentials: true
     })
     .pipe(
       tap(response => {
@@ -38,7 +40,7 @@ export class UserserviceService {
 
   // Register method with CORS headers
   register(userData: { name: string; email: string; password: string; confirm_password?: string }): Observable<any> {
-    return this.http.post(`${API_URL}/register`, userData, {
+    return this.http.post(`${this.apiUrl}/register`, userData, {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -55,7 +57,7 @@ export class UserserviceService {
       'Accept': 'application/json'
     });
     
-    return this.http.get(`${API_URL}/allusers`, { 
+    return this.http.get(`${this.apiUrl}/allusers`, { 
       headers: headers,
       withCredentials: true 
     });
@@ -69,7 +71,7 @@ export class UserserviceService {
       'Accept': 'application/json'
     });
     
-    return this.http.get(`${API_URL}/user/${userId}`, { 
+    return this.http.get(`${this.apiUrl}/user/${userId}`, { 
       headers: headers,
       withCredentials: true 
     });
@@ -86,7 +88,7 @@ export class UserserviceService {
     return localStorage.getItem('jwt_token');
   }
 
-  // Set token (corrected to use 'jwt_token' consistently)
+  // Set token
   setToken(token: string): void {
     localStorage.setItem('jwt_token', token);
   }
@@ -103,7 +105,7 @@ export class UserserviceService {
     console.log('User logged out, all tokens cleared');
   }
 
-  // Optional: Add method to update user profile
+  // Update user profile
   updateProfile(userData: any): Observable<any> {
     const token = this.getToken();
     const headers = new HttpHeaders({
@@ -112,7 +114,7 @@ export class UserserviceService {
       'Accept': 'application/json'
     });
     
-    return this.http.put(`${API_URL}/profile`, userData, { 
+    return this.http.put(`${this.apiUrl}/profile`, userData, { 
       headers: headers,
       withCredentials: true 
     });

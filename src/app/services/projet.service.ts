@@ -2,12 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pivot } from '../home/Models/Pivot';
+import { environment } from '../../environments/environment';  // ✅ ADD THIS
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjetService {
-  private baseUrl = 'http://localhost:8000/api';
+  
+  // ✅ USE ENVIRONMENT URL
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -27,8 +30,6 @@ export class ProjetService {
   deleteProjet(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/projet/deleteprojet/${id}`);
   }
-
-
 
   // Postes
   getPostes(): Observable<any> {
@@ -51,9 +52,11 @@ export class ProjetService {
   getCollaborateur(annee: number): Observable<Pivot[]> {
     return this.http.get<Pivot[]>(`${this.baseUrl}/projetdetail/getcollaborateur`);
   }
+
   addCollaborateur(data: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/projetdetail/addcollaborateur`, data);
   }
+
   updateCollaborateur(id: number, data: Pivot): Observable<any> {
     return this.http.put(`${this.baseUrl}/projetdetail/updatecollaborateur/${id}`, data);
   }
@@ -61,6 +64,4 @@ export class ProjetService {
   getCollaborateursByProject(projectId: number) {
     return this.http.get<any>(`${this.baseUrl}/projetdetail/collaborateurs/${projectId}`);
   }
-  
-  
 }
